@@ -1,0 +1,190 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "AWS Aurora (MultiAZ PostgreSQL DB), License: Apache 2.0 (qs-tnvcfn001)"
+Conditions: 
+  IOPSStorageType: 
+    - DBStorageType
+    - io1
+  IsDBMultiAZ: 
+    - DBMultiAZ
+    - "true"
+Outputs: 
+  DBName: 
+    Description: "Amazon Aurora database name"
+    Value: DBName
+  RDSEndPointAddress: 
+    Description: "Amazon Aurora endpoint"
+    Value: "${AuroraDBCluster.Endpoint.Address}"
+  RDSEndPointPort: 
+    Description: "Amazon Aurora port"
+    Value: "${AuroraDBCluster.Endpoint.Port}"
+  RDSEndPoints: 
+    Description: "Full Amazon Aurora endpoint"
+    Value: "${AuroraDBCluster.Endpoint.Address}:${AuroraDBCluster.Endpoint.Port}/${DBName}"
+Parameters: 
+  DBAllocatedStorage: 
+    ConstraintDescription: "must be between 5 and 4096 GiB. If IOPS specified, the allocated storage must be at least 100 GiB and with minimum IOPS value of 1000"
+    Default: "16"
+    Description: "The size of the database in gigabytes (GiB)"
+    MaxValue: "4096"
+    MinValue: "5"
+    Type: Number
+  DBAutoMinorVersionUpgrade: 
+    AllowedValues: 
+      - "true"
+      - "false"
+    Default: "true"
+    Description: "Select true/false to setup Auto Minor Version upgrade"
+    Type: String
+  DBBackupRetentionPeriod: 
+    Default: "7"
+    Description: "The number of days for which automatic database snapshots are retained."
+    Type: String
+  DBInstanceClass: 
+    AllowedValues: 
+      - db.r4.large
+      - db.r4.xlarge
+      - db.r4.2xlarge
+      - db.r4.4xlarge
+      - db.r4.8xlarge
+    ConstraintDescription: "Must select a valid database instance type."
+    Default: db.r4.large
+    Description: "The name of the compute and memory capacity class of the database instance."
+    Type: String
+  DBIops: 
+    AllowedValues: 
+      - "1000"
+      - "2000"
+      - "3000"
+      - "4000"
+      - "5000"
+      - "6000"
+      - "7000"
+      - "8000"
+      - "9000"
+      - "10000"
+    ConstraintDescription: "1000 IOPS minimum and increased in 1K increments."
+    Default: "1000"
+    Description: "Database IOPS. Used only when io1 specified for the storage type property"
+    Type: Number
+  DBMasterUserPassword: 
+    AllowedPattern: "(?=^.{6,255}$)((?=.*\\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\\d)(?=.*[^A-Za-z0-9])(?=.*[a-z])|(?=.*[^A-Za-z0-9])(?=.*[A-Z])(?=.*[a-z])|(?=.*\\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9]))^.*"
+    ConstraintDescription: "Min 8 chars."
+    Description: "The database admin account password"
+    MaxLength: "64"
+    MinLength: "8"
+    NoEcho: "True"
+    Type: String
+  DBMasterUsername: 
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
+    ConstraintDescription: "must begin with a letter and contain only alphanumeric characters."
+    Default: admin
+    Description: "The database admin account username"
+    MaxLength: "16"
+    MinLength: "1"
+    NoEcho: "true"
+    Type: String
+  DBMultiAZ: 
+    AllowedValues: 
+      - "true"
+      - "false"
+    Default: "true"
+    Description: "Specifies if the database instance is a multiple Availability Zone deployment."
+    Type: String
+  DBName: 
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
+    Default: QuickstartCordaDB
+    Description: "Name of the Amazon Aurora database for the Corda stack"
+    MaxLength: "64"
+    MinLength: "5"
+    Type: String
+  DBStorageType: 
+    AllowedValues: 
+      - standard
+      - gp2
+      - io1
+    Default: standard
+    Description: "The storage type associated with this database instance"
+    Type: String
+  Subnets: 
+    ConstraintDescription: "must be a list of existing subnet IDs"
+    Description: "At least two existing subnets in separate Availability Zones of your Virtual Private Cloud (VPC)"
+    Type: "List<AWS::EC2::Subnet::Id>"
+  VPCID: 
+    Description: "ID of the VPC (e.g., vpc-0343606e)"
+    Type: "AWS::EC2::VPC::Id"
+Resources: 
+  AuroraDB1: 
+    Properties: 
+      AutoMinorVersionUpgrade: DBAutoMinorVersionUpgrade
+      DBClusterIdentifier: AuroraDBCluster
+      DBInstanceClass: DBInstanceClass
+      Engine: aurora-postgresql
+      Iops: 
+        - IOPSStorageType
+        - DBIops
+        - "AWS::NoValue"
+      Tags: 
+        - 
+          Key: Name
+          Value: "AuroraDB-${AWS::StackName}"
+    Type: "AWS::RDS::DBInstance"
+  AuroraDB2: 
+    Condition: IsDBMultiAZ
+    Properties: 
+      AutoMinorVersionUpgrade: DBAutoMinorVersionUpgrade
+      DBClusterIdentifier: AuroraDBCluster
+      DBInstanceClass: DBInstanceClass
+      Engine: aurora-postgresql
+      Iops: 
+        - IOPSStorageType
+        - DBIops
+        - "AWS::NoValue"
+      Tags: 
+        - 
+          Key: Name
+          Value: "AuroraDB-${AWS::StackName}"
+    Type: "AWS::RDS::DBInstance"
+  AuroraDBCluster: 
+    Properties: 
+      BackupRetentionPeriod: DBBackupRetentionPeriod
+      DBClusterParameterGroupName: default.aurora-postgresql9.6
+      DBSubnetGroupName: AuroraDBSubnetGroup
+      DatabaseName: DBName
+      Engine: aurora-postgresql
+      MasterUserPassword: DBMasterUserPassword
+      MasterUsername: DBMasterUsername
+      Tags: 
+        - 
+          Key: Name
+          Value: "AuroraDB-${AWS::StackName}"
+      VpcSecurityGroupIds: 
+        - RDSSecurityGroup
+    Type: "AWS::RDS::DBCluster"
+  AuroraDBSubnetGroup: 
+    Properties: 
+      DBSubnetGroupDescription: "Subnets available for the Amazon Aurora database instance"
+      SubnetIds: Subnets
+    Type: "AWS::RDS::DBSubnetGroup"
+  RDSSecurityGroup: 
+    Properties: 
+      GroupDescription: "Allow access to database port (AWS Quick Start)"
+      SecurityGroupEgress: 
+        - 
+          CidrIp: 0.0.0.0/0
+          FromPort: "80"
+          IpProtocol: tcp
+          ToPort: "80"
+        - 
+          CidrIp: 0.0.0.0/0
+          FromPort: "443"
+          IpProtocol: tcp
+          ToPort: "443"
+      SecurityGroupIngress: 
+        - 
+          CidrIp: 0.0.0.0/0
+          FromPort: "3306"
+          IpProtocol: tcp
+          ToPort: "3306"
+      VpcId: VPCID
+    Type: "AWS::EC2::SecurityGroup"
+    
