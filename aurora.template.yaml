@@ -1,25 +1,27 @@
-AWSTemplateFormatVersion: "2010-09-09"
+AWSTemplateFormatVersion: '2010-09-09'
 Description: "AWS Aurora (MultiAZ PostgreSQL DB), License: Apache 2.0 (qs-tnvcfn001)"
-Conditions: 
-  IOPSStorageType: 
-    - DBStorageType
+Conditions:
+  IOPSStorageType:
+    !Equals
+    - !Ref DBStorageType
     - io1
-  IsDBMultiAZ: 
-    - DBMultiAZ
-    - "true"
+  IsDBMultiAZ:
+    !Equals
+    - !Ref DBMultiAZ
+    - 'true'
 Outputs: 
   DBName: 
     Description: "Amazon Aurora database name"
     Value: DBName
   RDSEndPointAddress: 
     Description: "Amazon Aurora endpoint"
-    Value: "${AuroraDBCluster.Endpoint.Address}"
+    Value: !Sub ${AuroraDBCluster.Endpoint.Address}
   RDSEndPointPort: 
     Description: "Amazon Aurora port"
-    Value: "${AuroraDBCluster.Endpoint.Port}"
+    Value: !Sub ${AuroraDBCluster.Endpoint.Port}
   RDSEndPoints: 
     Description: "Full Amazon Aurora endpoint"
-    Value: "${AuroraDBCluster.Endpoint.Address}:${AuroraDBCluster.Endpoint.Port}/${DBName}"
+    Value: !Sub ${AuroraDBCluster.Endpoint.Address}:${AuroraDBCluster.Endpoint.Port}/${DBName}
 Parameters: 
   DBAllocatedStorage: 
     ConstraintDescription: "must be between 5 and 4096 GiB. If IOPS specified, the allocated storage must be at least 100 GiB and with minimum IOPS value of 1000"
@@ -92,8 +94,8 @@ Parameters:
     Type: String
   DBName: 
     AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
-    Default: QuickstartCordaDB
-    Description: "Name of the Amazon Aurora database for the Corda stack"
+    Default: AuroraPostgresDB
+    Description: "Name of the Amazon Aurora database"
     MaxLength: "64"
     MinLength: "5"
     Type: String
@@ -115,55 +117,59 @@ Parameters:
 Resources: 
   AuroraDB1: 
     Properties: 
-      AutoMinorVersionUpgrade: DBAutoMinorVersionUpgrade
-      DBClusterIdentifier: AuroraDBCluster
-      DBInstanceClass: DBInstanceClass
+      AutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
+      AllocatedStorage: !Ref DBAllocatedStorage
+      DBClusterIdentifier: !Ref AuroraDBCluster
+      DBInstanceClass: !Ref DBInstanceClass
       Engine: aurora-postgresql
-      Iops: 
+      Iops:
+        !If
         - IOPSStorageType
-        - DBIops
-        - "AWS::NoValue"
+        - !Ref DBIops
+        - !Ref AWS::NoValue
       Tags: 
         - 
           Key: Name
-          Value: "AuroraDB-${AWS::StackName}"
+          Value: !Sub AuroraDB-${AWS::StackName}
     Type: "AWS::RDS::DBInstance"
   AuroraDB2: 
     Condition: IsDBMultiAZ
     Properties: 
-      AutoMinorVersionUpgrade: DBAutoMinorVersionUpgrade
-      DBClusterIdentifier: AuroraDBCluster
-      DBInstanceClass: DBInstanceClass
+      AutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
+      AllocatedStorage: !Ref DBAllocatedStorage
+      DBClusterIdentifier: !Ref AuroraDBCluster
+      DBInstanceClass: !Ref DBInstanceClass
       Engine: aurora-postgresql
-      Iops: 
+      Iops:
+        !If
         - IOPSStorageType
-        - DBIops
-        - "AWS::NoValue"
+        - !Ref DBIops
+        - !Ref AWS::NoValue
       Tags: 
         - 
           Key: Name
-          Value: "AuroraDB-${AWS::StackName}"
+          Value: !Sub AuroraDB-${AWS::StackName}
     Type: "AWS::RDS::DBInstance"
   AuroraDBCluster: 
     Properties: 
-      BackupRetentionPeriod: DBBackupRetentionPeriod
+      BackupRetentionPeriod: !Ref DBBackupRetentionPeriod
       DBClusterParameterGroupName: default.aurora-postgresql9.6
-      DBSubnetGroupName: AuroraDBSubnetGroup
+      DBSubnetGroupName: !Ref AuroraDBSubnetGroup
       DatabaseName: DBName
       Engine: aurora-postgresql
-      MasterUserPassword: DBMasterUserPassword
-      MasterUsername: DBMasterUsername
+      MasterUserPassword: !Ref DBMasterUserPassword
+      MasterUsername: !Ref DBMasterUsername
       Tags: 
         - 
           Key: Name
-          Value: "AuroraDB-${AWS::StackName}"
+          Value: !Sub AuroraDB-${AWS::StackName}
       VpcSecurityGroupIds: 
         - RDSSecurityGroup
     Type: "AWS::RDS::DBCluster"
   AuroraDBSubnetGroup: 
     Properties: 
       DBSubnetGroupDescription: "Subnets available for the Amazon Aurora database instance"
-      SubnetIds: Subnets
+      SubnetIds: !Ref Subnets
     Type: "AWS::RDS::DBSubnetGroup"
   RDSSecurityGroup: 
     Properties: 
@@ -171,20 +177,20 @@ Resources:
       SecurityGroupEgress: 
         - 
           CidrIp: 0.0.0.0/0
-          FromPort: "80"
+          FromPort: 80
           IpProtocol: tcp
-          ToPort: "80"
+          ToPort: 80
         - 
           CidrIp: 0.0.0.0/0
-          FromPort: "443"
+          FromPort: 443
           IpProtocol: tcp
-          ToPort: "443"
+          ToPort: 443
       SecurityGroupIngress: 
         - 
           CidrIp: 0.0.0.0/0
-          FromPort: "3306"
+          FromPort: 3306
           IpProtocol: tcp
-          ToPort: "3306"
-      VpcId: VPCID
+          ToPort: 3306
+      VpcId: !Ref VPCID
     Type: "AWS::EC2::SecurityGroup"
     
