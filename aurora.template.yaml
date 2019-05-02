@@ -1,5 +1,52 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "AWS Aurora (MultiAZ PostgreSQL DB), License: Apache 2.0 (qs-tnvcfn001)"
+Description: "AWS Aurora [MultiAZ Postgres DB], (qs-tnvcfn001)"
+Metadata:
+  LICENSE: Apache License Version 2.0
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: Database Configuration
+      Parameters:
+      - DBName
+      - DBAllocatedStorage
+      - DBAutoMinorVersionUpgrade
+      - DBBackupRetentionPeriod
+      - DBInstanceClass
+      - DBIops
+      - DBMasterUsername
+      - DBMasterUserPassword
+      - DBMultiAZ
+      - DBStorageType
+    - Label:
+        default: Network Configuration
+      Parameters:
+      - Subnets
+      - VPCID
+    ParameterLabels:
+      DBName:
+        default: Database Name
+      DBAllocatedStorage:
+        default: Database Allocated Storage
+      DBAutoMinorVersionUpgrade:
+        default: Database Auto Minor Version Upgrade
+      DBBackupRetentionPeriod:
+        default: Database Backup Retention Period
+      DBInstanceClass:
+        default: Database Instance Class
+      DBIops:
+        default: Database Iops
+      DBMasterUsername:
+        default: Database Master Username
+      DBMasterUserPassword:
+        default: Database Master Password
+      DBMultiAZ:
+        default: Single or MultiAZ Deployment
+      DBStorageType:
+        default: Data Storage Type
+      Subnets:
+        default: Subnet Ids
+      VPCID:
+        default: VPC Id
 Conditions:
   IOPSStorageType:
     !Equals
@@ -83,7 +130,6 @@ Parameters:
     Description: "The database admin account username"
     MaxLength: "16"
     MinLength: "1"
-    NoEcho: "true"
     Type: String
   DBMultiAZ: 
     AllowedValues: 
