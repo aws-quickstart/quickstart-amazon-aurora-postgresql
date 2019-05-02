@@ -20,7 +20,8 @@ Metadata:
     - Label:
         default: Network Configuration
       Parameters:
-      - Subnets
+      - PublicSubnet1ID
+      - PublicSubnet2ID
       - VPCID
     ParameterLabels:
       DBName:
@@ -43,8 +44,10 @@ Metadata:
         default: Single or MultiAZ Deployment
       DBStorageType:
         default: Data Storage Type
-      Subnets:
-        default: Subnet Ids
+      PublicSubnet1ID:
+        default: Public Subnet1 ID
+      PublicSubnet2ID:
+        default: Public Subnet2 ID
       VPCID:
         default: VPC Id
 Conditions:
@@ -126,7 +129,7 @@ Parameters:
   DBMasterUsername: 
     AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
     ConstraintDescription: "must begin with a letter and contain only alphanumeric characters."
-    Default: admin
+    Default: pgadmin
     Description: "The database admin account username"
     MaxLength: "16"
     MinLength: "1"
@@ -153,10 +156,13 @@ Parameters:
     Default: standard
     Description: "The storage type associated with this database instance"
     Type: String
-  Subnets: 
-    ConstraintDescription: "must be a list of existing subnet IDs"
-    Description: "At least two existing subnets in separate Availability Zones of your Virtual Private Cloud (VPC)"
-    Type: "List<AWS::EC2::Subnet::Id>"
+  PublicSubnet1ID:
+    Description: Public Subnet Id 1
+    Type: 'AWS::EC2::Subnet::Id'
+  PublicSubnet2ID:
+    Description: Public Subnet Id 2
+    Type: 'AWS::EC2::Subnet::Id'
+
   VPCID: 
     Description: "ID of the VPC (e.g., vpc-0343606e)"
     Type: "AWS::EC2::VPC::Id"
@@ -164,7 +170,6 @@ Resources:
   AuroraDB1: 
     Properties: 
       AutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
-      AllocatedStorage: !Ref DBAllocatedStorage
       DBClusterIdentifier: !Ref AuroraDBCluster
       DBInstanceClass: !Ref DBInstanceClass
       Engine: aurora-postgresql
@@ -182,7 +187,6 @@ Resources:
     Condition: IsDBMultiAZ
     Properties: 
       AutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
-      AllocatedStorage: !Ref DBAllocatedStorage
       DBClusterIdentifier: !Ref AuroraDBCluster
       DBInstanceClass: !Ref DBInstanceClass
       Engine: aurora-postgresql
@@ -210,16 +214,18 @@ Resources:
           Key: Name
           Value: !Sub AuroraDB-${AWS::StackName}
       VpcSecurityGroupIds: 
-        - RDSSecurityGroup
+        - !Ref RDSSecurityGroup
     Type: "AWS::RDS::DBCluster"
   AuroraDBSubnetGroup: 
     Properties: 
       DBSubnetGroupDescription: "Subnets available for the Amazon Aurora database instance"
-      SubnetIds: !Ref Subnets
+      SubnetIds: 
+       - !Ref PublicSubnet1ID
+       - !Ref PublicSubnet2ID
     Type: "AWS::RDS::DBSubnetGroup"
   RDSSecurityGroup: 
     Properties: 
-      GroupDescription: "Allow access to database port (AWS Quick Start)"
+      GroupDescription: "Allow access to database port" 
       SecurityGroupEgress: 
         - 
           CidrIp: 0.0.0.0/0

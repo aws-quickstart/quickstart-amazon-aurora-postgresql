@@ -1,0 +1,18 @@
+[
+    {
+        "ParameterKey": "AvailabilityZones",
+        "ParameterValue": "$[taskcat_genaz_2]"
+    },
+    {
+        "ParameterKey": "KeyPairName",
+        "ParameterValue": "get_from_override_file"
+    },
+    {
+        "ParameterKey": "QSS3BucketName",
+        "ParameterValue": "tonyv"
+    },
+    {
+        "ParameterKey": "DBMasterUserPassword",
+        "ParameterValue": "$[taskcat_genpass_8A]"
+    }
+]

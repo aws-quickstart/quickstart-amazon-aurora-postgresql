@@ -1,0 +1,14 @@
+[
+    {
+        "ParameterKey": "DBMasterUserPassword",
+        "ParameterValue": "$[taskcat_genpass_8A]"
+    },
+    {
+        "ParameterKey": "Subnets",
+        "ParameterValue": "NEED_VALUE"
+    },
+    {
+        "ParameterKey": "VPCID",
+        "ParameterValue": "NEED_VALUE"
+    }
+]
