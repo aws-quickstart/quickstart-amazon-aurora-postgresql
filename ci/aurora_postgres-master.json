@@ -5,11 +5,11 @@
     },
     {
         "ParameterKey": "KeyPairName",
-        "ParameterValue": "get_from_override_file"
+        "ParameterValue": "tonynv"
     },
     {
         "ParameterKey": "QSS3BucketName",
-        "ParameterValue": "tonyv"
+        "ParameterValue": "$[taskcat_autobucket]"
     },
     {
         "ParameterKey": "DBMasterUserPassword",
