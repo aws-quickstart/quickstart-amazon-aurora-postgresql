@@ -59,6 +59,10 @@ Conditions:
     !Equals
     - !Ref DBMultiAZ
     - 'true'
+  DoCreateDatabase:
+    !Equals
+    - !Ref DBName
+    - ''
 Outputs: 
   DBName: 
     Description: "Amazon Aurora database name"
@@ -205,7 +209,7 @@ Resources:
       BackupRetentionPeriod: !Ref DBBackupRetentionPeriod
       DBClusterParameterGroupName: default.aurora-postgresql9.6
       DBSubnetGroupName: !Ref AuroraDBSubnetGroup
-      DatabaseName: DBName
+      DatabaseName: !If [DoCreateDatabase, !Ref DBName, 'AWS::NoValue']
       Engine: aurora-postgresql
       MasterUserPassword: !Ref DBMasterUserPassword
       MasterUsername: !Ref DBMasterUsername
