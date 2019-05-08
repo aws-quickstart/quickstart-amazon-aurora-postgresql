@@ -94,7 +94,7 @@ Outputs:
   RDSEndPoints: 
     Description: "Full Amazon Aurora endpoint"
     Value: !Sub ${AuroraDBCluster.Endpoint.Address}:${AuroraDBCluster.Endpoint.Port}/${DBName}
-  DBEncryptionKey:
+  RDSEncryptionKey:
     Condition: UseDatabaseEncryption
     Description: The alias of the encryption key created for RDS
     Value: !Ref EncryptionKeyAlias
@@ -183,6 +183,7 @@ Parameters:
     Description: "Name of the Amazon Aurora database"
     MaxLength: "64"
     MinLength: "0"
+    Default: ''
     Type: String
   CustomDBSecurityGroup:
     Description: "ID of the security group (e.g. sg-0234se). One will be created for you if left empty."
