@@ -146,11 +146,10 @@ Parameters:
     Description: "Specifies if the database instance is a multiple Availability Zone deployment."
     Type: String
   DBName: 
-    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
-    Default: AuroraPostgresDB
+    AllowedPattern: "[a-zA-Z0-9]*"
     Description: "Name of the Amazon Aurora database"
     MaxLength: "64"
-    MinLength: "5"
+    MinLength: "0"
     Type: String
   DBStorageType: 
     AllowedValues: 
