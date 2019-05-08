@@ -208,7 +208,11 @@ Resources:
       BackupRetentionPeriod: !Ref DBBackupRetentionPeriod
       DBClusterParameterGroupName: default.aurora-postgresql9.6
       DBSubnetGroupName: !Ref AuroraDBSubnetGroup
-      DatabaseName: !If [DoCreateDatabase, !Ref DBName, 'AWS::NoValue']
+      DatabaseName:
+        !If
+        - DoCreateDatabase
+        - !Ref DBName
+        - !Ref AWS::NoValue
       Engine: aurora-postgresql
       MasterUserPassword: !Ref DBMasterUserPassword
       MasterUsername: !Ref DBMasterUsername
