@@ -52,7 +52,7 @@ Metadata:
       VPCID:
         default: VPC Id
       CustomDBSecurityGroup:
-        default: Custom security group to apply to the db. One will be created for you if left empty
+        default: Custom Securiy Group
 Conditions:
   IOPSStorageType:
     !Equals
@@ -63,10 +63,9 @@ Conditions:
     - !Ref DBMultiAZ
     - 'true'
   CreateSecurityGroup:
-    !Not
-    - !Equals
-      - !Ref CustomDBSecurityGroup
-      - ''
+    !Equals
+    - !Ref CustomDBSecurityGroup
+    - ''
 Outputs: 
   DBName: 
     Description: "Amazon Aurora database name"
@@ -157,8 +156,9 @@ Parameters:
     MinLength: "5"
     Type: String
   CustomDBSecurityGroup:
-    Description: The security groups to apply to the database
-    Type: AWS::EC2::SecurityGroup::Id
+    Description: "ID of the security group (e.g. sg-0234se). One will be created for you if left empty."
+    Type: String
+    Default: ''
   DBStorageType: 
     AllowedValues: 
       - standard
@@ -175,8 +175,9 @@ Parameters:
     Type: 'AWS::EC2::Subnet::Id'
 
   VPCID: 
-    Description: "ID of the VPC (e.g., vpc-0343606e)"
-    Type: "AWS::EC2::VPC::Id"
+    Description: "ID of the VPC to create a security group in leave blank if you are supplying a custom security group (e.g., vpc-0343606e)"
+    Type: String
+    Default: ''
 Resources: 
   AuroraDB1: 
     Properties: 
@@ -227,8 +228,8 @@ Resources:
       VpcSecurityGroupIds: 
         !If
           - CreateSecurityGroup
-          - !Ref RDSSecurityGroup
-          - !Ref CustomDBSecurityGroup
+          - [!Ref RDSSecurityGroup]
+          - [!Ref CustomDBSecurityGroup]
     Type: "AWS::RDS::DBCluster"
   AuroraDBSubnetGroup: 
     Properties: 
