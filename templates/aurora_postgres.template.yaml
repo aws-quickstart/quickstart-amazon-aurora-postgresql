@@ -60,9 +60,10 @@ Conditions:
     - !Ref DBMultiAZ
     - 'true'
   DoCreateDatabase:
-    !Equals
-    - !Ref DBName
-    - ''
+    !Not
+      - !Equals
+        - !Ref DBName
+        - ''
 Outputs: 
   DBName: 
     Description: "Amazon Aurora database name"
