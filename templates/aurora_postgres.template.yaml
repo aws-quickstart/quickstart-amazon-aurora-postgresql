@@ -220,8 +220,8 @@ Resources:
     Properties:
       AliasName: !Sub "alias/${AWS::StackName}"
       TargetKeyId: !Ref EncryptionKey
-  AuroraDB1: 
-    Properties: 
+  AuroraDB1:
+    Properties:
       AutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
       DBClusterIdentifier: !Ref AuroraDBCluster
       DBInstanceClass: !Ref DBInstanceClass
@@ -231,14 +231,14 @@ Resources:
         - IOPSStorageType
         - !Ref DBIops
         - !Ref AWS::NoValue
-      Tags: 
-        - 
+      Tags:
+        -
           Key: Name
           Value: !Sub AuroraDB-${AWS::StackName}
     Type: "AWS::RDS::DBInstance"
-  AuroraDB2: 
+  AuroraDB2:
     Condition: IsDBMultiAZ
-    Properties: 
+    Properties:
       AutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
       DBClusterIdentifier: !Ref AuroraDBCluster
       DBInstanceClass: !Ref DBInstanceClass
@@ -248,8 +248,25 @@ Resources:
         - IOPSStorageType
         - !Ref DBIops
         - !Ref AWS::NoValue
-      Tags: 
-        - 
+      Tags:
+        -
+          Key: Name
+          Value: !Sub AuroraDB-${AWS::StackName}
+    Type: "AWS::RDS::DBInstance"
+  AuroraDB3:
+    Condition: IsDBMultiAZ
+    Properties:
+      AutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
+      DBClusterIdentifier: !Ref AuroraDBCluster
+      DBInstanceClass: !Ref DBInstanceClass
+      Engine: aurora-postgresql
+      Iops:
+        !If
+        - IOPSStorageType
+        - !Ref DBIops
+        - !Ref AWS::NoValue
+      Tags:
+        -
           Key: Name
           Value: !Sub AuroraDB-${AWS::StackName}
     Type: "AWS::RDS::DBInstance"
