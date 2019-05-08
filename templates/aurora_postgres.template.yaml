@@ -15,6 +15,7 @@ Metadata:
       - DBIops
       - DBMasterUsername
       - DBMasterUserPassword
+      - DBPort
       - DBMultiAZ
       - DBStorageType
     - Label:
@@ -40,6 +41,8 @@ Metadata:
         default: Database Master Username
       DBMasterUserPassword:
         default: Database Master Password
+      DBPort:
+        default: Database Port
       DBMultiAZ:
         default: Single or MultiAZ Deployment
       DBStorageType:
@@ -134,6 +137,10 @@ Parameters:
     MaxLength: "16"
     MinLength: "1"
     Type: String
+  DBPort:
+    Default: 3306
+    Description: "The port the instance will listen for connections on"
+    Type: Number
   DBMultiAZ: 
     AllowedValues: 
       - "true"
@@ -209,6 +216,7 @@ Resources:
       Engine: aurora-postgresql
       MasterUserPassword: !Ref DBMasterUserPassword
       MasterUsername: !Ref DBMasterUsername
+      Port: !Ref DBPort
       Tags: 
         - 
           Key: Name
@@ -240,9 +248,9 @@ Resources:
       SecurityGroupIngress: 
         - 
           CidrIp: 0.0.0.0/0
-          FromPort: 3306
+          FromPort: !Ref DBPort
           IpProtocol: tcp
-          ToPort: 3306
+          ToPort: !Ref DBPort
       VpcId: !Ref VPCID
     Type: "AWS::EC2::SecurityGroup"
     
