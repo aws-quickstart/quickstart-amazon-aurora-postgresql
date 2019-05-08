@@ -67,7 +67,7 @@ Conditions:
 Outputs: 
   DBName: 
     Description: "Amazon Aurora database name"
-    Value: DBName
+    Value: !Ref DBName
   RDSEndPointAddress: 
     Description: "Amazon Aurora endpoint"
     Value: !Sub ${AuroraDBCluster.Endpoint.Address}
