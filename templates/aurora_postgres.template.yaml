@@ -21,8 +21,8 @@ Metadata:
     - Label:
         default: Network Configuration
       Parameters:
-      - PublicSubnet1ID
-      - PublicSubnet2ID
+      - Subnet1ID
+      - Subnet2ID
       - VPCID
     ParameterLabels:
       DBName:
@@ -47,9 +47,9 @@ Metadata:
         default: Single or MultiAZ Deployment
       DBStorageType:
         default: Data Storage Type
-      PublicSubnet1ID:
+      Subnet1ID:
         default: Public Subnet1 ID
-      PublicSubnet2ID:
+      Subnet2ID:
         default: Public Subnet2 ID
       VPCID:
         default: VPC Id
@@ -62,10 +62,15 @@ Conditions:
     !Equals
     - !Ref DBMultiAZ
     - 'true'
+  DoCreateDatabase:
+    !Not
+      - !Equals
+        - !Ref DBName
+        - ''
 Outputs: 
   DBName: 
     Description: "Amazon Aurora database name"
-    Value: DBName
+    Value: !Ref DBName
   RDSEndPointAddress: 
     Description: "Amazon Aurora endpoint"
     Value: !Sub ${AuroraDBCluster.Endpoint.Address}
@@ -123,7 +128,7 @@ Parameters:
     Type: Number
   DBMasterUserPassword: 
     AllowedPattern: "(?=^.{6,255}$)((?=.*\\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\\d)(?=.*[^A-Za-z0-9])(?=.*[a-z])|(?=.*[^A-Za-z0-9])(?=.*[A-Z])(?=.*[a-z])|(?=.*\\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9]))^.*"
-    ConstraintDescription: "Min 8 chars."
+    ConstraintDescription: "Min 8 chars. Must include 1 uppercase, 1 lowercase, 1 number, 1 (non / @ \" ') symbol"
     Description: "The database admin account password"
     MaxLength: "64"
     MinLength: "8"
@@ -149,11 +154,10 @@ Parameters:
     Description: "Specifies if the database instance is a multiple Availability Zone deployment."
     Type: String
   DBName: 
-    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
-    Default: AuroraPostgresDB
+    AllowedPattern: "[a-zA-Z0-9]*"
     Description: "Name of the Amazon Aurora database"
     MaxLength: "64"
-    MinLength: "5"
+    MinLength: "0"
     Type: String
   DBStorageType: 
     AllowedValues: 
@@ -163,10 +167,10 @@ Parameters:
     Default: standard
     Description: "The storage type associated with this database instance"
     Type: String
-  PublicSubnet1ID:
+  Subnet1ID:
     Description: Public Subnet Id 1
     Type: 'AWS::EC2::Subnet::Id'
-  PublicSubnet2ID:
+  Subnet2ID:
     Description: Public Subnet Id 2
     Type: 'AWS::EC2::Subnet::Id'
 
@@ -212,7 +216,11 @@ Resources:
       BackupRetentionPeriod: !Ref DBBackupRetentionPeriod
       DBClusterParameterGroupName: default.aurora-postgresql9.6
       DBSubnetGroupName: !Ref AuroraDBSubnetGroup
-      DatabaseName: DBName
+      DatabaseName:
+        !If
+        - DoCreateDatabase
+        - !Ref DBName
+        - !Ref AWS::NoValue
       Engine: aurora-postgresql
       MasterUserPassword: !Ref DBMasterUserPassword
       MasterUsername: !Ref DBMasterUsername
@@ -228,8 +236,8 @@ Resources:
     Properties: 
       DBSubnetGroupDescription: "Subnets available for the Amazon Aurora database instance"
       SubnetIds: 
-       - !Ref PublicSubnet1ID
-       - !Ref PublicSubnet2ID
+       - !Ref Subnet1ID
+       - !Ref Subnet2ID
     Type: "AWS::RDS::DBSubnetGroup"
   RDSSecurityGroup: 
     Properties: 
