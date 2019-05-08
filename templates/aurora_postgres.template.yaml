@@ -19,12 +19,12 @@ Metadata:
       - DBMultiAZ
       - DBStorageType
       - DBAllocatedStorageEncrypted
-      - CustomDBSecurityGroup
     - Label:
         default: Network Configuration
       Parameters:
       - Subnet1ID
       - Subnet2ID
+      - CustomDBSecurityGroup
       - VPCID
     ParameterLabels:
       DBName:
@@ -32,7 +32,7 @@ Metadata:
       DBAllocatedStorage:
         default: Database Allocated Storage
       DBAllocatedStorageEncrypted:
-        defaul: Database Encrypted
+        default: Database Encryption Enabled
       DBAutoMinorVersionUpgrade:
         default: Database Auto Minor Version Upgrade
       DBBackupRetentionPeriod:
@@ -107,7 +107,7 @@ Parameters:
     MinValue: "5"
     Type: Number
   DBAllocatedStorageEncrypted:
-    Default: false
+    Default: true
     AllowedValues:
       - true
       - false
@@ -202,7 +202,6 @@ Parameters:
   Subnet2ID:
     Description: Public Subnet Id 2
     Type: 'AWS::EC2::Subnet::Id'
-
   VPCID: 
     Description: "ID of the VPC to create a security group in leave blank if you are supplying a custom security group (e.g., vpc-0343606e)"
     Type: String
