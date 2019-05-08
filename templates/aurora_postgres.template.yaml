@@ -18,6 +18,7 @@ Metadata:
       - DBPort
       - DBMultiAZ
       - DBStorageType
+      - DBAllocatedStorageEncrypted
     - Label:
         default: Network Configuration
       Parameters:
@@ -29,6 +30,8 @@ Metadata:
         default: Database Name
       DBAllocatedStorage:
         default: Database Allocated Storage
+      DBAllocatedStorageEncrypted:
+        defaul: Database Encrypted
       DBAutoMinorVersionUpgrade:
         default: Database Auto Minor Version Upgrade
       DBBackupRetentionPeriod:
@@ -67,6 +70,10 @@ Conditions:
       - !Equals
         - !Ref DBName
         - ''
+  UseDatabaseEncryption:
+    !Equals
+    - !Ref DBAllocatedStorageEncrypted
+    - true
 Outputs: 
   DBName: 
     Description: "Amazon Aurora database name"
@@ -80,6 +87,10 @@ Outputs:
   RDSEndPoints: 
     Description: "Full Amazon Aurora endpoint"
     Value: !Sub ${AuroraDBCluster.Endpoint.Address}:${AuroraDBCluster.Endpoint.Port}/${DBName}
+  DBEncryptionKey:
+    Condition: UseDatabaseEncryption
+    Description: The alias of the encryption key created for RDS
+    Value: !Ref EncryptionKeyAlias
 Parameters: 
   DBAllocatedStorage: 
     ConstraintDescription: "must be between 5 and 4096 GiB. If IOPS specified, the allocated storage must be at least 100 GiB and with minimum IOPS value of 1000"
@@ -88,6 +99,13 @@ Parameters:
     MaxValue: "4096"
     MinValue: "5"
     Type: Number
+  DBAllocatedStorageEncrypted:
+    Default: false
+    AllowedValues:
+      - true
+      - false
+    Description: Whether or not to encrypt the database
+    Type: String
   DBAutoMinorVersionUpgrade: 
     AllowedValues: 
       - "true"
@@ -177,7 +195,31 @@ Parameters:
   VPCID: 
     Description: "ID of the VPC (e.g., vpc-0343606e)"
     Type: "AWS::EC2::VPC::Id"
-Resources: 
+Resources:
+  EncryptionKey:
+    Condition: UseDatabaseEncryption
+    DeletionPolicy: Retain
+    Type: AWS::KMS::Key
+    Properties:
+      KeyPolicy:
+        Version: 2012-10-17
+        Id: !Ref AWS::StackName
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: 'kms:*'
+            Resource: '*'
+      Tags:
+        - Key: Name
+          Value: !Ref AWS::StackName
+  EncryptionKeyAlias:
+    Condition: UseDatabaseEncryption
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/${AWS::StackName}"
+      TargetKeyId: !Ref EncryptionKey
   AuroraDB1: 
     Properties: 
       AutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
@@ -222,9 +264,11 @@ Resources:
         - !Ref DBName
         - !Ref AWS::NoValue
       Engine: aurora-postgresql
+      KmsKeyId: !If [UseDatabaseEncryption, !GetAtt EncryptionKey.Arn, !Ref 'AWS::NoValue']
       MasterUserPassword: !Ref DBMasterUserPassword
       MasterUsername: !Ref DBMasterUsername
       Port: !Ref DBPort
+      StorageEncrypted: !If [UseDatabaseEncryption, !Ref DBAllocatedStorageEncrypted, !Ref 'AWS::NoValue']
       Tags: 
         - 
           Key: Name
