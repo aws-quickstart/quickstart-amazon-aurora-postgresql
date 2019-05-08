@@ -20,8 +20,8 @@ Metadata:
     - Label:
         default: Network Configuration
       Parameters:
-      - PublicSubnet1ID
-      - PublicSubnet2ID
+      - Subnet1ID
+      - Subnet2ID
       - VPCID
     ParameterLabels:
       DBName:
@@ -44,9 +44,9 @@ Metadata:
         default: Single or MultiAZ Deployment
       DBStorageType:
         default: Data Storage Type
-      PublicSubnet1ID:
+      Subnet1ID:
         default: Public Subnet1 ID
-      PublicSubnet2ID:
+      Subnet2ID:
         default: Public Subnet2 ID
       VPCID:
         default: VPC Id
@@ -159,10 +159,10 @@ Parameters:
     Default: standard
     Description: "The storage type associated with this database instance"
     Type: String
-  PublicSubnet1ID:
+  Subnet1ID:
     Description: Public Subnet Id 1
     Type: 'AWS::EC2::Subnet::Id'
-  PublicSubnet2ID:
+  Subnet2ID:
     Description: Public Subnet Id 2
     Type: 'AWS::EC2::Subnet::Id'
 
@@ -227,8 +227,8 @@ Resources:
     Properties: 
       DBSubnetGroupDescription: "Subnets available for the Amazon Aurora database instance"
       SubnetIds: 
-       - !Ref PublicSubnet1ID
-       - !Ref PublicSubnet2ID
+       - !Ref Subnet1ID
+       - !Ref Subnet2ID
     Type: "AWS::RDS::DBSubnetGroup"
   RDSSecurityGroup: 
     Properties: 
