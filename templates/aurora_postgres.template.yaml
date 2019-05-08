@@ -19,6 +19,7 @@ Metadata:
       - DBMultiAZ
       - DBStorageType
       - DBAllocatedStorageEncrypted
+      - CustomDBSecurityGroup
     - Label:
         default: Network Configuration
       Parameters:
@@ -56,6 +57,8 @@ Metadata:
         default: Public Subnet2 ID
       VPCID:
         default: VPC Id
+      CustomDBSecurityGroup:
+        default: Custom Securiy Group
 Conditions:
   IOPSStorageType:
     !Equals
@@ -74,6 +77,10 @@ Conditions:
     !Equals
     - !Ref DBAllocatedStorageEncrypted
     - true
+  CreateSecurityGroup:
+    !Equals
+    - !Ref CustomDBSecurityGroup
+    - ''
 Outputs: 
   DBName: 
     Description: "Amazon Aurora database name"
@@ -177,6 +184,10 @@ Parameters:
     MaxLength: "64"
     MinLength: "0"
     Type: String
+  CustomDBSecurityGroup:
+    Description: "ID of the security group (e.g. sg-0234se). One will be created for you if left empty."
+    Type: String
+    Default: ''
   DBStorageType: 
     AllowedValues: 
       - standard
@@ -193,8 +204,9 @@ Parameters:
     Type: 'AWS::EC2::Subnet::Id'
 
   VPCID: 
-    Description: "ID of the VPC (e.g., vpc-0343606e)"
-    Type: "AWS::EC2::VPC::Id"
+    Description: "ID of the VPC to create a security group in leave blank if you are supplying a custom security group (e.g., vpc-0343606e)"
+    Type: String
+    Default: ''
 Resources:
   EncryptionKey:
     Condition: UseDatabaseEncryption
@@ -291,7 +303,10 @@ Resources:
           Key: Name
           Value: !Sub AuroraDB-${AWS::StackName}
       VpcSecurityGroupIds: 
-        - !Ref RDSSecurityGroup
+        !If
+          - CreateSecurityGroup
+          - [!Ref RDSSecurityGroup]
+          - [!Ref CustomDBSecurityGroup]
     Type: "AWS::RDS::DBCluster"
   AuroraDBSubnetGroup: 
     Properties: 
@@ -300,7 +315,8 @@ Resources:
        - !Ref Subnet1ID
        - !Ref Subnet2ID
     Type: "AWS::RDS::DBSubnetGroup"
-  RDSSecurityGroup: 
+  RDSSecurityGroup:
+    Condition: CreateSecurityGroup
     Properties: 
       GroupDescription: "Allow access to database port" 
       SecurityGroupEgress: 
