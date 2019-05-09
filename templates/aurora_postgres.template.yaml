@@ -15,19 +15,24 @@ Metadata:
       - DBIops
       - DBMasterUsername
       - DBMasterUserPassword
+      - DBPort
       - DBMultiAZ
       - DBStorageType
+      - DBAllocatedStorageEncrypted
     - Label:
         default: Network Configuration
       Parameters:
-      - PublicSubnet1ID
-      - PublicSubnet2ID
+      - Subnet1ID
+      - Subnet2ID
+      - CustomDBSecurityGroup
       - VPCID
     ParameterLabels:
       DBName:
         default: Database Name
       DBAllocatedStorage:
         default: Database Allocated Storage
+      DBAllocatedStorageEncrypted:
+        default: Database Encryption Enabled
       DBAutoMinorVersionUpgrade:
         default: Database Auto Minor Version Upgrade
       DBBackupRetentionPeriod:
@@ -40,16 +45,20 @@ Metadata:
         default: Database Master Username
       DBMasterUserPassword:
         default: Database Master Password
+      DBPort:
+        default: Database Port
       DBMultiAZ:
         default: Single or MultiAZ Deployment
       DBStorageType:
         default: Data Storage Type
-      PublicSubnet1ID:
+      Subnet1ID:
         default: Public Subnet1 ID
-      PublicSubnet2ID:
+      Subnet2ID:
         default: Public Subnet2 ID
       VPCID:
         default: VPC Id
+      CustomDBSecurityGroup:
+        default: Custom Securiy Group
 Conditions:
   IOPSStorageType:
     !Equals
@@ -59,10 +68,23 @@ Conditions:
     !Equals
     - !Ref DBMultiAZ
     - 'true'
+  DoCreateDatabase:
+    !Not
+      - !Equals
+        - !Ref DBName
+        - ''
+  UseDatabaseEncryption:
+    !Equals
+    - !Ref DBAllocatedStorageEncrypted
+    - true
+  CreateSecurityGroup:
+    !Equals
+    - !Ref CustomDBSecurityGroup
+    - ''
 Outputs: 
   DBName: 
     Description: "Amazon Aurora database name"
-    Value: DBName
+    Value: !Ref DBName
   RDSEndPointAddress: 
     Description: "Amazon Aurora endpoint"
     Value: !Sub ${AuroraDBCluster.Endpoint.Address}
@@ -72,6 +94,10 @@ Outputs:
   RDSEndPoints: 
     Description: "Full Amazon Aurora endpoint"
     Value: !Sub ${AuroraDBCluster.Endpoint.Address}:${AuroraDBCluster.Endpoint.Port}/${DBName}
+  RDSEncryptionKey:
+    Condition: UseDatabaseEncryption
+    Description: The alias of the encryption key created for RDS
+    Value: !Ref EncryptionKeyAlias
 Parameters: 
   DBAllocatedStorage: 
     ConstraintDescription: "must be between 5 and 4096 GiB. If IOPS specified, the allocated storage must be at least 100 GiB and with minimum IOPS value of 1000"
@@ -80,6 +106,13 @@ Parameters:
     MaxValue: "4096"
     MinValue: "5"
     Type: Number
+  DBAllocatedStorageEncrypted:
+    Default: true
+    AllowedValues:
+      - true
+      - false
+    Description: Whether or not to encrypt the database
+    Type: String
   DBAutoMinorVersionUpgrade: 
     AllowedValues: 
       - "true"
@@ -120,7 +153,7 @@ Parameters:
     Type: Number
   DBMasterUserPassword: 
     AllowedPattern: "(?=^.{6,255}$)((?=.*\\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\\d)(?=.*[^A-Za-z0-9])(?=.*[a-z])|(?=.*[^A-Za-z0-9])(?=.*[A-Z])(?=.*[a-z])|(?=.*\\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9]))^.*"
-    ConstraintDescription: "Min 8 chars."
+    ConstraintDescription: "Min 8 chars. Must include 1 uppercase, 1 lowercase, 1 number, 1 (non / @ \" ') symbol"
     Description: "The database admin account password"
     MaxLength: "64"
     MinLength: "8"
@@ -134,6 +167,10 @@ Parameters:
     MaxLength: "16"
     MinLength: "1"
     Type: String
+  DBPort:
+    Default: 3306
+    Description: "The port the instance will listen for connections on"
+    Type: Number
   DBMultiAZ: 
     AllowedValues: 
       - "true"
@@ -142,12 +179,16 @@ Parameters:
     Description: "Specifies if the database instance is a multiple Availability Zone deployment."
     Type: String
   DBName: 
-    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
-    Default: AuroraPostgresDB
+    AllowedPattern: "[a-zA-Z0-9]*"
     Description: "Name of the Amazon Aurora database"
     MaxLength: "64"
-    MinLength: "5"
+    MinLength: "0"
+    Default: ''
     Type: String
+  CustomDBSecurityGroup:
+    Description: "ID of the security group (e.g. sg-0234se). One will be created for you if left empty."
+    Type: String
+    Default: ''
   DBStorageType: 
     AllowedValues: 
       - standard
@@ -156,19 +197,43 @@ Parameters:
     Default: standard
     Description: "The storage type associated with this database instance"
     Type: String
-  PublicSubnet1ID:
+  Subnet1ID:
     Description: Public Subnet Id 1
     Type: 'AWS::EC2::Subnet::Id'
-  PublicSubnet2ID:
+  Subnet2ID:
     Description: Public Subnet Id 2
     Type: 'AWS::EC2::Subnet::Id'
-
   VPCID: 
-    Description: "ID of the VPC (e.g., vpc-0343606e)"
-    Type: "AWS::EC2::VPC::Id"
-Resources: 
-  AuroraDB1: 
-    Properties: 
+    Description: "ID of the VPC you are deploying Aurora in (e.g., vpc-0343606e)"
+    Type: 'AWS::EC2::VPC::Id'
+    Default: ''
+Resources:
+  EncryptionKey:
+    Condition: UseDatabaseEncryption
+    DeletionPolicy: Retain
+    Type: AWS::KMS::Key
+    Properties:
+      KeyPolicy:
+        Version: 2012-10-17
+        Id: !Ref AWS::StackName
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: 'kms:*'
+            Resource: '*'
+      Tags:
+        - Key: Name
+          Value: !Ref AWS::StackName
+  EncryptionKeyAlias:
+    Condition: UseDatabaseEncryption
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/${AWS::StackName}"
+      TargetKeyId: !Ref EncryptionKey
+  AuroraDB1:
+    Properties:
       AutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
       DBClusterIdentifier: !Ref AuroraDBCluster
       DBInstanceClass: !Ref DBInstanceClass
@@ -178,14 +243,14 @@ Resources:
         - IOPSStorageType
         - !Ref DBIops
         - !Ref AWS::NoValue
-      Tags: 
-        - 
+      Tags:
+        -
           Key: Name
           Value: !Sub AuroraDB-${AWS::StackName}
     Type: "AWS::RDS::DBInstance"
-  AuroraDB2: 
+  AuroraDB2:
     Condition: IsDBMultiAZ
-    Properties: 
+    Properties:
       AutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
       DBClusterIdentifier: !Ref AuroraDBCluster
       DBInstanceClass: !Ref DBInstanceClass
@@ -195,8 +260,25 @@ Resources:
         - IOPSStorageType
         - !Ref DBIops
         - !Ref AWS::NoValue
-      Tags: 
-        - 
+      Tags:
+        -
+          Key: Name
+          Value: !Sub AuroraDB-${AWS::StackName}
+    Type: "AWS::RDS::DBInstance"
+  AuroraDB3:
+    Condition: IsDBMultiAZ
+    Properties:
+      AutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
+      DBClusterIdentifier: !Ref AuroraDBCluster
+      DBInstanceClass: !Ref DBInstanceClass
+      Engine: aurora-postgresql
+      Iops:
+        !If
+        - IOPSStorageType
+        - !Ref DBIops
+        - !Ref AWS::NoValue
+      Tags:
+        -
           Key: Name
           Value: !Sub AuroraDB-${AWS::StackName}
     Type: "AWS::RDS::DBInstance"
@@ -205,25 +287,36 @@ Resources:
       BackupRetentionPeriod: !Ref DBBackupRetentionPeriod
       DBClusterParameterGroupName: default.aurora-postgresql9.6
       DBSubnetGroupName: !Ref AuroraDBSubnetGroup
-      DatabaseName: DBName
+      DatabaseName:
+        !If
+        - DoCreateDatabase
+        - !Ref DBName
+        - !Ref AWS::NoValue
       Engine: aurora-postgresql
+      KmsKeyId: !If [UseDatabaseEncryption, !GetAtt EncryptionKey.Arn, !Ref 'AWS::NoValue']
       MasterUserPassword: !Ref DBMasterUserPassword
       MasterUsername: !Ref DBMasterUsername
+      Port: !Ref DBPort
+      StorageEncrypted: !If [UseDatabaseEncryption, !Ref DBAllocatedStorageEncrypted, !Ref 'AWS::NoValue']
       Tags: 
         - 
           Key: Name
           Value: !Sub AuroraDB-${AWS::StackName}
       VpcSecurityGroupIds: 
-        - !Ref RDSSecurityGroup
+        !If
+          - CreateSecurityGroup
+          - [!Ref RDSSecurityGroup]
+          - [!Ref CustomDBSecurityGroup]
     Type: "AWS::RDS::DBCluster"
   AuroraDBSubnetGroup: 
     Properties: 
       DBSubnetGroupDescription: "Subnets available for the Amazon Aurora database instance"
       SubnetIds: 
-       - !Ref PublicSubnet1ID
-       - !Ref PublicSubnet2ID
+       - !Ref Subnet1ID
+       - !Ref Subnet2ID
     Type: "AWS::RDS::DBSubnetGroup"
-  RDSSecurityGroup: 
+  RDSSecurityGroup:
+    Condition: CreateSecurityGroup
     Properties: 
       GroupDescription: "Allow access to database port" 
       SecurityGroupEgress: 
@@ -240,9 +333,9 @@ Resources:
       SecurityGroupIngress: 
         - 
           CidrIp: 0.0.0.0/0
-          FromPort: 3306
+          FromPort: !Ref DBPort
           IpProtocol: tcp
-          ToPort: 3306
+          ToPort: !Ref DBPort
       VpcId: !Ref VPCID
     Type: "AWS::EC2::SecurityGroup"
     

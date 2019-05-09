@@ -160,14 +160,14 @@ Resources:
       TemplateURL:
         Fn::Sub: https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/aurora_postgres.template.yaml
       Parameters:
-        PublicSubnet1ID:
+        Subnet1ID:
           Fn::GetAtt:
           - VPCStack
-          - Outputs.PublicSubnet1ID
-        PublicSubnet2ID:
+          - Outputs.PrivateSubnet1AID
+        Subnet2ID:
           Fn::GetAtt:
           - VPCStack
-          - Outputs.PublicSubnet2ID
+          - Outputs.PrivateSubnet2AID
         VPCID:
           Fn::GetAtt:
           - VPCStack
