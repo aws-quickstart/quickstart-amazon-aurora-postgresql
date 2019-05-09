@@ -204,8 +204,8 @@ Parameters:
     Description: Public Subnet Id 2
     Type: 'AWS::EC2::Subnet::Id'
   VPCID: 
-    Description: "ID of the VPC to create a security group in leave blank if you are supplying a custom security group (e.g., vpc-0343606e)"
-    Type: String
+    Description: "ID of the VPC you are deploying Aurora in (e.g., vpc-0343606e)"
+    Type: 'AWS::EC2::VPC::Id'
     Default: ''
 Resources:
   EncryptionKey:
