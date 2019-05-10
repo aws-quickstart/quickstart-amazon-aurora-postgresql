@@ -8,7 +8,6 @@ Metadata:
         default: Database Configuration
       Parameters:
       - DBName
-      - DBAllocatedStorage
       - DBAutoMinorVersionUpgrade
       - DBBackupRetentionPeriod
       - DBInstanceClass
@@ -29,8 +28,6 @@ Metadata:
     ParameterLabels:
       DBName:
         default: Database Name
-      DBAllocatedStorage:
-        default: Database Allocated Storage
       DBAllocatedStorageEncrypted:
         default: Database Encryption Enabled
       DBAutoMinorVersionUpgrade:
@@ -52,9 +49,9 @@ Metadata:
       DBStorageType:
         default: Data Storage Type
       Subnet1ID:
-        default: Public Subnet1 ID
+        default: Private Subnet1 ID
       Subnet2ID:
-        default: Public Subnet2 ID
+        default: Private Subnet2 ID
       VPCID:
         default: VPC Id
       CustomDBSecurityGroup:
@@ -99,13 +96,6 @@ Outputs:
     Description: The alias of the encryption key created for RDS
     Value: !Ref EncryptionKeyAlias
 Parameters: 
-  DBAllocatedStorage: 
-    ConstraintDescription: "must be between 5 and 4096 GiB. If IOPS specified, the allocated storage must be at least 100 GiB and with minimum IOPS value of 1000"
-    Default: "16"
-    Description: "The size of the database in gigabytes (GiB)"
-    MaxValue: "4096"
-    MinValue: "5"
-    Type: Number
   DBAllocatedStorageEncrypted:
     Default: true
     AllowedValues:
@@ -131,6 +121,7 @@ Parameters:
       - db.r4.2xlarge
       - db.r4.4xlarge
       - db.r4.8xlarge
+      - db.r4.16xlarge
     ConstraintDescription: "Must select a valid database instance type."
     Default: db.r4.large
     Description: "The name of the compute and memory capacity class of the database instance."
@@ -198,10 +189,10 @@ Parameters:
     Description: "The storage type associated with this database instance"
     Type: String
   Subnet1ID:
-    Description: Public Subnet Id 1
+    Description: Private Subnet Id 1
     Type: 'AWS::EC2::Subnet::Id'
   Subnet2ID:
-    Description: Public Subnet Id 2
+    Description: Private Subnet Id 2
     Type: 'AWS::EC2::Subnet::Id'
   VPCID: 
     Description: "ID of the VPC you are deploying Aurora in (e.g., vpc-0343606e)"

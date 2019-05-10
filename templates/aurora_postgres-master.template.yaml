@@ -1,6 +1,67 @@
----
 AWSTemplateFormatVersion: 2010-09-09
 Description: "AWS VPC + Aurora [MultiAZ Postgres DB], (qs-tnvcfn000)"
+Metadata:
+  LICENSE: Apache License Version 2.0
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: Database Configuration
+      Parameters:
+      - DBName
+      - DBAutoMinorVersionUpgrade
+      - DBBackupRetentionPeriod
+      - DBInstanceClass
+      - DBIops
+      - DBMasterUsername
+      - DBMasterUserPassword
+      - DBMultiAZ
+      - DBStorageType
+    - Label:
+        default: Network Configuration
+      Parameters:
+      - KeyPairName
+      - AvailabilityZones
+      - PrivateSubnet1CIDR
+      - PrivateSubnet2CIDR
+      - PublicSubnet1CIDR
+      - PublicSubnet2CIDR
+      - VPCCIDR
+    - Label:
+        default: QuickStart Configuration
+      Parameters:
+      - QSS3BucketName
+      - QSS3KeyPrefix
+    ParameterLabels:
+      AvailabilityZones:
+        default: Availability Zones
+      DBName:
+        default: Database Name
+      DBAutoMinorVersionUpgrade:
+        default: Database Auto Minor Version Upgrade
+      DBBackupRetentionPeriod:
+        default: Database Backup Retention Period
+      DBInstanceClass:
+        default: Database Instance Class
+      DBIops:
+        default: Database Iops
+      DBMasterUsername:
+        default: Database Master Username
+      DBMasterUserPassword:
+        default: Database Master Password
+      DBMultiAZ:
+        default: Single or MultiAZ Deployment
+      DBStorageType:
+        default: Data Storage Type
+      PrivateSubnet1CIDR:
+        default: Private subnet 1 CIDR
+      PrivateSubnet2CIDR:
+        default: Private subnet 2 CIDR
+      QSS3BucketName:
+        default: Quick Start S3 bucket name
+      QSS3KeyPrefix:
+        default: Quick Start S3 key prefix
+      VPCCIDR:
+        default: VPC CIDR
 Parameters:
   AvailabilityZones:
    Description: >-
@@ -33,8 +94,12 @@ Parameters:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
     Default: 10.0.144.0/20
-    Description: CIDR block for the public (DMZ) subnet 2 located in Availability
-      Zone 2
+    Description: CIDR block for the public (DMZ) subnet 2 located in Availability Zone 2
+    Type: String
+  RemoteAccessCIDR:
+    AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$"
+    ConstraintDescription: "CIDR block parameter must be in the form x.x.x.x/x"
+    Description: "Allowed CIDR block for external SSH access"
     Type: String
   VPCCIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
@@ -45,22 +110,15 @@ Parameters:
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
-    Default: tonyv
+    Default: aws-quickstart
     Description: "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
     Type: String
   QSS3KeyPrefix:
     AllowedPattern: "^[0-9a-zA-Z-/]*$"
     ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
-    Default: aws-cfn/
+    Default: quickstart-aws-aurora-postgresql/
     Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
     Type: String
-  DBAllocatedStorage: 
-    ConstraintDescription: "must be between 5 and 4096 GiB. If IOPS specified, the allocated storage must be at least 100 GiB and with minimum IOPS value of 1000"
-    Default: "16"
-    Description: "The size of the database in gigabytes (GiB)"
-    MaxValue: "4096"
-    MinValue: "5"
-    Type: Number
   DBAutoMinorVersionUpgrade: 
     AllowedValues: 
       - "true"
@@ -137,12 +195,21 @@ Parameters:
     Default: standard
     Description: "The storage type associated with this database instance"
     Type: String
+Conditions:
+  GovCloudCondition: !Equals 
+    - !Ref 'AWS::Region'
+    - us-gov-west-1
 Resources:
   VPCStack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
-      TemplateURL: !Sub >-
-        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template
+      TemplateURL: !Sub
+        - https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template
+        - QSS3Region:
+            Fn::If:
+            - GovCloudCondition
+            - s3-us-gov-west-1
+            - s3
       Parameters:
         AvailabilityZones: !Join 
           - ','
@@ -157,8 +224,9 @@ Resources:
   AuroraStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL:
-        Fn::Sub: https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/aurora_postgres.template.yaml
+      TemplateURL: !Sub 
+        - https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}templates/aurora_postgres.template.yaml
+        - QSS3Region: !If [GovCloudCondition , s3-us-gov-west-1 , s3]
       Parameters:
         Subnet1ID:
           Fn::GetAtt:
@@ -173,7 +241,6 @@ Resources:
           - VPCStack
           - Outputs.VPCID
         DBName: !Ref DBName
-        DBAllocatedStorage: !Ref DBAllocatedStorage
         DBAutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
         DBBackupRetentionPeriod: !Ref DBBackupRetentionPeriod
         DBInstanceClass: !Ref DBInstanceClass
