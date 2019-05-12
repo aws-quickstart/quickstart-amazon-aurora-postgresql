@@ -27,6 +27,10 @@ Metadata:
       - PublicSubnet2CIDR
       - VPCCIDR
     - Label:
+        default: Linux Bastion Configuration
+      Parameters:
+       - EnableBastion
+    - Label:
         default: QuickStart Configuration
       Parameters:
       - QSS3BucketName
@@ -52,6 +56,8 @@ Metadata:
         default: Single or MultiAZ Deployment
       DBStorageType:
         default: Data Storage Type
+      EnableBastion:
+        default: Create Bastion Stack
       PrivateSubnet1CIDR:
         default: Private subnet 1 CIDR
       PrivateSubnet2CIDR:
@@ -118,6 +124,13 @@ Parameters:
     ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
     Default: quickstart-aws-aurora-postgresql/
     Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Type: String
+  EnableBastion: 
+    AllowedValues: 
+      - "true"
+      - "false"
+    Default: "true"
+    Description: "If ture a Bastion stack will be created"
     Type: String
   DBAutoMinorVersionUpgrade: 
     AllowedValues: 
@@ -199,6 +212,9 @@ Conditions:
   GovCloudCondition: !Equals 
     - !Ref 'AWS::Region'
     - us-gov-west-1
+  EnableBastionAccess: !Equals
+    - !Ref EnableBastion
+    - "true"
 Resources:
   VPCStack:
     Type: 'AWS::CloudFormation::Stack'
@@ -249,3 +265,22 @@ Resources:
         DBMasterUserPassword: !Ref DBMasterUserPassword
         DBMultiAZ: !Ref DBMultiAZ
         DBStorageType: !Ref DBStorageType
+  BastionStack:
+    Condition: EnableBastionAccess
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub 
+        - https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-linux-bastion/templates/linux-bastion.template
+        - QSS3Region: !If [GovCloudCondition , s3-us-gov-west-1 , s3]
+      Parameters:
+        KeyPairName: !Ref KeyPairName
+        PublicSubnet1ID: !GetAtt 
+          - VPCStack
+          - Outputs.PublicSubnet1ID
+        PublicSubnet2ID: !GetAtt 
+          - VPCStack
+          - Outputs.PublicSubnet2ID
+        RemoteAccessCIDR: !Ref RemoteAccessCIDR
+        VPCID: !GetAtt 
+          - VPCStack
+          - Outputs.VPCID
