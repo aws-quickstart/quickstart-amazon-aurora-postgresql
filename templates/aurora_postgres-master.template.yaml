@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: "AWS VPC + Aurora [MultiAZ Postgres DB], (qs-tnvcfn000)"
+Description: "AWS VPC + Aurora Postgres, Do Not Remove Apache License Version 2.0 (qs-1pj6s43hc) May,15,2019"
 Metadata:
   LICENSE: Apache License Version 2.0
   AWS::CloudFormation::Interface:
@@ -30,6 +30,7 @@ Metadata:
         default: Linux Bastion Configuration
       Parameters:
        - EnableBastion
+       - RemoteAccessCIDR
     - Label:
         default: QuickStart Configuration
       Parameters:
@@ -122,7 +123,7 @@ Parameters:
   QSS3KeyPrefix:
     AllowedPattern: "^[0-9a-zA-Z-/]*$"
     ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
-    Default: quickstart-aws-aurora-postgresql/
+    Default: quickstart-amazon-aurora/
     Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
     Type: String
   EnableBastion: 
@@ -265,6 +266,7 @@ Resources:
         DBMasterUserPassword: !Ref DBMasterUserPassword
         DBMultiAZ: !Ref DBMultiAZ
         DBStorageType: !Ref DBStorageType
+        DBAccessCIDR: !Ref VPCCIDR
   BastionStack:
     Condition: EnableBastionAccess
     Type: 'AWS::CloudFormation::Stack'

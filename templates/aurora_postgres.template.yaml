@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "AWS Aurora [MultiAZ Postgres DB], (qs-tnvcfn001)"
+Description: "AWS Aurora Postgres, Do Not Remove Apache License Version 2.0 (qs-1pj6s43e3) May,15,2019"
 Metadata:
   LICENSE: Apache License Version 2.0
   AWS::CloudFormation::Interface:
@@ -15,6 +15,7 @@ Metadata:
       - DBMasterUsername
       - DBMasterUserPassword
       - DBPort
+      - DBAccessCIDR
       - DBMultiAZ
       - DBStorageType
       - DBAllocatedStorageEncrypted
@@ -44,6 +45,8 @@ Metadata:
         default: Database Master Password
       DBPort:
         default: Database Port
+      DBAccessCIDR:
+        default: Database Connection CIDR
       DBMultiAZ:
         default: Single or MultiAZ Deployment
       DBStorageType:
@@ -126,6 +129,12 @@ Parameters:
     Default: db.r4.large
     Description: "The name of the compute and memory capacity class of the database instance."
     Type: String
+  DBAccessCIDR:
+    AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$"
+    ConstraintDescription: "CIDR block parameter must be in the form x.x.x.x/x"
+    Description: "Allowed CIDR block for external SSH access"
+    Type: String
+    Default: 10.0.0.0/16
   DBIops: 
     AllowedValues: 
       - "1000"
@@ -323,7 +332,7 @@ Resources:
           ToPort: 443
       SecurityGroupIngress: 
         - 
-          CidrIp: 0.0.0.0/0
+          CidrIp: !Ref DBAccessCIDR 
           FromPort: !Ref DBPort
           IpProtocol: tcp
           ToPort: !Ref DBPort

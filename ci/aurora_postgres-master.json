@@ -16,6 +16,14 @@
         "ParameterValue": "override"
     },
     {
+        "ParameterKey": "DBMultiAZ",
+        "ParameterValue": "false"
+    },
+    {
+        "ParameterKey": "EnableBastion",
+        "ParameterValue": "false"
+    },
+    {
         "ParameterKey": "DBMasterUserPassword",
         "ParameterValue": "$[taskcat_genpass_8A]"
     }
