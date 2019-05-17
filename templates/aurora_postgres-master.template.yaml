@@ -135,7 +135,7 @@ Parameters:
     Description: "Select true/false to setup Auto Minor Version upgrade"
     Type: String
   DBBackupRetentionPeriod: 
-    Default: "7"
+    Default: "35"
     Description: "The number of days for which automatic database snapshots are retained."
     Type: String
   DBInstanceClass: 
