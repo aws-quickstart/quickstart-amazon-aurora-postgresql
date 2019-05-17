@@ -11,11 +11,9 @@ Metadata:
       - DBAutoMinorVersionUpgrade
       - DBBackupRetentionPeriod
       - DBInstanceClass
-      - DBIops
       - DBMasterUsername
       - DBMasterUserPassword
       - DBMultiAZ
-      - DBStorageType
     - Label:
         default: Network Configuration
       Parameters:
@@ -47,16 +45,12 @@ Metadata:
         default: Database Backup Retention Period
       DBInstanceClass:
         default: Database Instance Class
-      DBIops:
-        default: Database Iops
       DBMasterUsername:
         default: Database Master Username
       DBMasterUserPassword:
         default: Database Master Password
       DBMultiAZ:
         default: Single or MultiAZ Deployment
-      DBStorageType:
-        default: Data Storage Type
       EnableBastion:
         default: Create Bastion Stack
       PrivateSubnet1CIDR:
@@ -155,22 +149,6 @@ Parameters:
     Default: db.r4.large
     Description: "The name of the compute and memory capacity class of the database instance."
     Type: String
-  DBIops: 
-    AllowedValues: 
-      - "1000"
-      - "2000"
-      - "3000"
-      - "4000"
-      - "5000"
-      - "6000"
-      - "7000"
-      - "8000"
-      - "9000"
-      - "10000"
-    ConstraintDescription: "1000 IOPS minimum and increased in 1K increments."
-    Default: "1000"
-    Description: "Database IOPS. Used only when io1 specified for the storage type property"
-    Type: Number
   DBMasterUserPassword: 
     AllowedPattern: "(?=^.{6,255}$)((?=.*\\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\\d)(?=.*[^A-Za-z0-9])(?=.*[a-z])|(?=.*[^A-Za-z0-9])(?=.*[A-Z])(?=.*[a-z])|(?=.*\\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9]))^.*"
     ConstraintDescription: "Min 8 chars."
@@ -200,14 +178,6 @@ Parameters:
     Description: "Name of the Amazon Aurora database"
     MaxLength: "64"
     MinLength: "5"
-    Type: String
-  DBStorageType: 
-    AllowedValues: 
-      - standard
-      - gp2
-      - io1
-    Default: standard
-    Description: "The storage type associated with this database instance"
     Type: String
 Conditions:
   GovCloudCondition: !Equals 
@@ -261,11 +231,9 @@ Resources:
         DBAutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
         DBBackupRetentionPeriod: !Ref DBBackupRetentionPeriod
         DBInstanceClass: !Ref DBInstanceClass
-        DBIops: !Ref DBIops 
         DBMasterUsername: !Ref DBMasterUsername
         DBMasterUserPassword: !Ref DBMasterUserPassword
         DBMultiAZ: !Ref DBMultiAZ
-        DBStorageType: !Ref DBStorageType
         DBAccessCIDR: !Ref VPCCIDR
   BastionStack:
     Condition: EnableBastionAccess
