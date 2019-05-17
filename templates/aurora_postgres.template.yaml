@@ -11,13 +11,11 @@ Metadata:
       - DBAutoMinorVersionUpgrade
       - DBBackupRetentionPeriod
       - DBInstanceClass
-      - DBIops
       - DBMasterUsername
       - DBMasterUserPassword
       - DBPort
       - DBAccessCIDR
       - DBMultiAZ
-      - DBStorageType
       - DBAllocatedStorageEncrypted
     - Label:
         default: Network Configuration
@@ -37,8 +35,6 @@ Metadata:
         default: Database Backup Retention Period
       DBInstanceClass:
         default: Database Instance Class
-      DBIops:
-        default: Database Iops
       DBMasterUsername:
         default: Database Master Username
       DBMasterUserPassword:
@@ -49,8 +45,6 @@ Metadata:
         default: Database Connection CIDR
       DBMultiAZ:
         default: Single or MultiAZ Deployment
-      DBStorageType:
-        default: Data Storage Type
       Subnet1ID:
         default: Private Subnet1 ID
       Subnet2ID:
@@ -60,10 +54,6 @@ Metadata:
       CustomDBSecurityGroup:
         default: Custom Securiy Group
 Conditions:
-  IOPSStorageType:
-    !Equals
-    - !Ref DBStorageType
-    - io1
   IsDBMultiAZ:
     !Equals
     - !Ref DBMultiAZ
@@ -135,22 +125,6 @@ Parameters:
     Description: "Allowed CIDR block for external SSH access"
     Type: String
     Default: 10.0.0.0/16
-  DBIops: 
-    AllowedValues: 
-      - "1000"
-      - "2000"
-      - "3000"
-      - "4000"
-      - "5000"
-      - "6000"
-      - "7000"
-      - "8000"
-      - "9000"
-      - "10000"
-    ConstraintDescription: "1000 IOPS minimum and increased in 1K increments."
-    Default: "1000"
-    Description: "Database IOPS. Used only when io1 specified for the storage type property"
-    Type: Number
   DBMasterUserPassword: 
     AllowedPattern: "(?=^.{6,255}$)((?=.*\\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\\d)(?=.*[^A-Za-z0-9])(?=.*[a-z])|(?=.*[^A-Za-z0-9])(?=.*[A-Z])(?=.*[a-z])|(?=.*\\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9]))^.*"
     ConstraintDescription: "Min 8 chars. Must include 1 uppercase, 1 lowercase, 1 number, 1 (non / @ \" ') symbol"
@@ -189,14 +163,6 @@ Parameters:
     Description: "ID of the security group (e.g. sg-0234se). One will be created for you if left empty."
     Type: String
     Default: ''
-  DBStorageType: 
-    AllowedValues: 
-      - standard
-      - gp2
-      - io1
-    Default: standard
-    Description: "The storage type associated with this database instance"
-    Type: String
   Subnet1ID:
     Description: Private Subnet Id 1
     Type: 'AWS::EC2::Subnet::Id'
@@ -238,11 +204,6 @@ Resources:
       DBClusterIdentifier: !Ref AuroraDBCluster
       DBInstanceClass: !Ref DBInstanceClass
       Engine: aurora-postgresql
-      Iops:
-        !If
-        - IOPSStorageType
-        - !Ref DBIops
-        - !Ref AWS::NoValue
       Tags:
         -
           Key: Name
@@ -255,11 +216,6 @@ Resources:
       DBClusterIdentifier: !Ref AuroraDBCluster
       DBInstanceClass: !Ref DBInstanceClass
       Engine: aurora-postgresql
-      Iops:
-        !If
-        - IOPSStorageType
-        - !Ref DBIops
-        - !Ref AWS::NoValue
       Tags:
         -
           Key: Name
@@ -272,11 +228,6 @@ Resources:
       DBClusterIdentifier: !Ref AuroraDBCluster
       DBInstanceClass: !Ref DBInstanceClass
       Engine: aurora-postgresql
-      Iops:
-        !If
-        - IOPSStorageType
-        - !Ref DBIops
-        - !Ref AWS::NoValue
       Tags:
         -
           Key: Name
