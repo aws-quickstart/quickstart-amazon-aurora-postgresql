@@ -678,5 +678,5 @@ Resources:
       SourceIds:
       - !Ref AuroraDB1
       - !If [IsDBMultiAZ, !Ref AuroraDB2, !Ref "AWS::NoValue"]
-	  - !If [IsDBMultiAZ, !Ref AuroraDB3, !Ref "AWS::NoValue"]
+      - !If [IsDBMultiAZ, !Ref AuroraDB3, !Ref "AWS::NoValue"]
       SourceType: 'db-instance'
