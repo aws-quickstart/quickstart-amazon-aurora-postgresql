@@ -281,14 +281,9 @@ Resources:
       SecurityGroupEgress: 
         - 
           CidrIp: 0.0.0.0/0
-          FromPort: 80
-          IpProtocol: tcp
-          ToPort: 80
-        - 
-          CidrIp: 0.0.0.0/0
-          FromPort: 443
-          IpProtocol: tcp
-          ToPort: 443
+          FromPort: -1
+          IpProtocol: -1
+          ToPort: -1
       SecurityGroupIngress: 
         - 
           CidrIp: !Ref DBAccessCIDR 
@@ -297,4 +292,12 @@ Resources:
           ToPort: !Ref DBPort
       VpcId: !Ref VPCID
     Type: "AWS::EC2::SecurityGroup"
+  RDSSecurityGroupIngress:
+    Condition: CreateSecurityGroup
+    Properties:
+      GroupId: !GetAtt 'RDSSecurityGroup.GroupId'
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref RDSSecurityGroup
+      Description: 'Self Reference'
+    Type: 'AWS::EC2::SecurityGroupIngress'
     
