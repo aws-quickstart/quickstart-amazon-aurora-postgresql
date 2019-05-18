@@ -13,6 +13,7 @@ Metadata:
       - DBInstanceClass
       - DBMasterUsername
       - DBMasterUserPassword
+      - DBPort
       - DBMultiAZ
     - Label:
         default: Network Configuration
@@ -49,6 +50,8 @@ Metadata:
         default: Database Master Username
       DBMasterUserPassword:
         default: Database Master Password
+      DBPort:
+        default: Database Port
       DBMultiAZ:
         default: Single or MultiAZ Deployment
       EnableBastion:
@@ -131,11 +134,11 @@ Parameters:
     AllowedValues: 
       - "true"
       - "false"
-    Default: "true"
+    Default: "false"
     Description: "Select true/false to setup Auto Minor Version upgrade"
     Type: String
   DBBackupRetentionPeriod: 
-    Default: "7"
+    Default: "35"
     Description: "The number of days for which automatic database snapshots are retained."
     Type: String
   DBInstanceClass: 
@@ -165,6 +168,13 @@ Parameters:
     MaxLength: "16"
     MinLength: "1"
     Type: String
+  DBPort:
+    Default: 5432
+    Description: "The port the instance will listen for connections on"
+    Type: Number
+    ConstraintDescription: 'Must be in the range [1115-65535]'
+    MinValue: 1150
+    MaxValue: 65535
   DBMultiAZ: 
     AllowedValues: 
       - "true"
@@ -233,6 +243,7 @@ Resources:
         DBInstanceClass: !Ref DBInstanceClass
         DBMasterUsername: !Ref DBMasterUsername
         DBMasterUserPassword: !Ref DBMasterUserPassword
+        DBPort: !Ref DBPort
         DBMultiAZ: !Ref DBMultiAZ
         DBAccessCIDR: !Ref VPCCIDR
   BastionStack:
