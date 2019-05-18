@@ -482,11 +482,11 @@ Resources:
       MetricName: CPUUtilization
       Statistic: Maximum
       Namespace: 'AWS/RDS'
-      Threshold: '80'
+      Threshold: 80
       Unit: Percent
       ComparisonOperator: 'GreaterThanOrEqualToThreshold'
-      Period: '60'
-      EvaluationPeriods: '5'
+      Period: 60
+      EvaluationPeriods: 5
       TreatMissingData: 'notBreaching'
   CPUUtilizationAlarm2:
     Condition: IsDBMultiAZ
@@ -503,11 +503,11 @@ Resources:
       MetricName: CPUUtilization
       Statistic: Maximum
       Namespace: 'AWS/RDS'
-      Threshold: '80'
+      Threshold: 80
       Unit: Percent
       ComparisonOperator: 'GreaterThanOrEqualToThreshold'
-      Period: '60'
-      EvaluationPeriods: '5'
+      Period: 60
+      EvaluationPeriods: 5
       TreatMissingData: 'notBreaching'
   CPUUtilizationAlarm3:
     Condition: IsDBMultiAZ
@@ -524,11 +524,11 @@ Resources:
       MetricName: CPUUtilization
       Statistic: Maximum
       Namespace: 'AWS/RDS'
-      Threshold: '80'
+      Threshold: 80
       Unit: Percent
       ComparisonOperator: 'GreaterThanOrEqualToThreshold'
-      Period: '60'
-      EvaluationPeriods: '5'
+      Period: 60
+      EvaluationPeriods: 5
       TreatMissingData: 'notBreaching'
   MaxUsedTxIDsAlarm1:
     Type: "AWS::CloudWatch::Alarm"
@@ -544,11 +544,11 @@ Resources:
       MetricName: 'MaximumUsedTransactionIDs'
       Statistic: Average
       Namespace: 'AWS/RDS'
-      Threshold: '600000000'
+      Threshold: 600000000
       Unit: Count
       ComparisonOperator: 'GreaterThanOrEqualToThreshold'
-      Period: '60'
-      EvaluationPeriods: '5'
+      Period: 60
+      EvaluationPeriods: 5
       TreatMissingData: 'notBreaching'
   MaxUsedTxIDsAlarm2:
     Condition: IsDBMultiAZ
@@ -565,11 +565,11 @@ Resources:
       MetricName: 'MaximumUsedTransactionIDs'
       Statistic: Average
       Namespace: 'AWS/RDS'
-      Threshold: '600000000'
+      Threshold: 600000000
       Unit: Count
       ComparisonOperator: 'GreaterThanOrEqualToThreshold'
-      Period: '60'
-      EvaluationPeriods: '5'
+      Period: 60
+      EvaluationPeriods: 5
       TreatMissingData: 'notBreaching'
   MaxUsedTxIDsAlarm3:
     Condition: IsDBMultiAZ
@@ -586,11 +586,11 @@ Resources:
       MetricName: 'MaximumUsedTransactionIDs'
       Statistic: Average
       Namespace: 'AWS/RDS'
-      Threshold: '600000000'
+      Threshold: 600000000
       Unit: Count
       ComparisonOperator: 'GreaterThanOrEqualToThreshold'
-      Period: '60'
-      EvaluationPeriods: '5'
+      Period: 60
+      EvaluationPeriods: 5
       TreatMissingData: 'notBreaching'
   FreeLocalStorageAlarm1:
     Type: "AWS::CloudWatch::Alarm"
@@ -606,11 +606,11 @@ Resources:
       MetricName: 'FreeLocalStorage'
       Statistic: Average
       Namespace: 'AWS/RDS'
-      Threshold: '5368709120'
+      Threshold: 5368709120
       Unit: Bytes
       ComparisonOperator: 'LessThanOrEqualToThreshold'
-      Period: '60'
-      EvaluationPeriods: '5'
+      Period: 60
+      EvaluationPeriods: 5
       TreatMissingData: 'notBreaching'
   FreeLocalStorageAlarm2:
     Condition: IsDBMultiAZ
@@ -627,11 +627,11 @@ Resources:
       MetricName: 'FreeLocalStorage'
       Statistic: Average
       Namespace: 'AWS/RDS'
-      Threshold: '5368709120'
+      Threshold: 5368709120
       Unit: Bytes
       ComparisonOperator: 'LessThanOrEqualToThreshold'
-      Period: '60'
-      EvaluationPeriods: '5'
+      Period: 60
+      EvaluationPeriods: 5
       TreatMissingData: 'notBreaching'
   FreeLocalStorageAlarm3:
     Condition: IsDBMultiAZ
@@ -648,11 +648,11 @@ Resources:
       MetricName: 'FreeLocalStorage'
       Statistic: Average
       Namespace: 'AWS/RDS'
-      Threshold: '5368709120'
+      Threshold: 5368709120
       Unit: Bytes
       ComparisonOperator: 'LessThanOrEqualToThreshold'
-      Period: '60'
-      EvaluationPeriods: '5'
+      Period: 60
+      EvaluationPeriods: 5
       TreatMissingData: 'notBreaching'
   DatabaseClusterEventSubscription:
     Type: 'AWS::RDS::EventSubscription'
