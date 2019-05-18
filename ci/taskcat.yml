@@ -1,6 +1,6 @@
 global:
   owner: tony@vattathil.com
-  qsname: quickstart-aws-aurora-postgresql
+  qsname: quickstart-amazon-aurora
   regions:
     - ap-northeast-1
     - ap-northeast-2
