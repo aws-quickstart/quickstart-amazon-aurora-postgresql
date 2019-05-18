@@ -17,6 +17,7 @@ Metadata:
       - DBAccessCIDR
       - DBMultiAZ
       - DBAllocatedStorageEncrypted
+      - NotificationList
     - Label:
         default: Network Configuration
       Parameters:
@@ -63,6 +64,8 @@ Metadata:
         default: VPC Id
       CustomDBSecurityGroup:
         default: Custom Securiy Group
+      NotificationList:
+        default: SNS Notification Email
       EnvironmentStage:
         default: Environment Stage
       ApplicationVersion:
@@ -194,6 +197,11 @@ Parameters:
     Description: "ID of the VPC you are deploying Aurora in (e.g., vpc-0343606e)"
     Type: 'AWS::EC2::VPC::Id'
     Default: ''
+  NotificationList:
+    Type: String
+    Description: The Email notification list is used to configure a SNS topic for sending cloudwatch alarm and RDS Event notifications
+    AllowedPattern: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
+    ConstraintDescription: provide a valid email address.
   EnvironmentStage:
     Type: String
     Description: The environment tag is used to designate the Environment Stage of the associated AWS resource.
@@ -242,6 +250,12 @@ Parameters:
       - other
       - none
 Resources:
+  DBSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+      - Endpoint: !Ref NotificationList
+        Protocol: email
   EncryptionKey:
     Condition: UseDatabaseEncryption
     DeletionPolicy: Retain
@@ -452,4 +466,217 @@ Resources:
       SourceSecurityGroupId: !Ref RDSSecurityGroup
       Description: 'Self Reference'
     Type: 'AWS::EC2::SecurityGroupIngress'
-    
+  CPUUtilizationAlarm1:
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'CPU_Utilization'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          Ref: AuroraDB1
+      MetricName: CPUUtilization
+      Statistic: Maximum
+      Namespace: 'AWS/RDS'
+      Threshold: '80'
+      Unit: Percent
+      ComparisonOperator: 'GreaterThanOrEqualToThreshold'
+      Period: '60'
+      EvaluationPeriods: '5'
+      TreatMissingData: 'notBreaching'
+  CPUUtilizationAlarm2:
+    Condition: IsDBMultiAZ
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'CPU_Utilization'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          Ref: AuroraDB2
+      MetricName: CPUUtilization
+      Statistic: Maximum
+      Namespace: 'AWS/RDS'
+      Threshold: '80'
+      Unit: Percent
+      ComparisonOperator: 'GreaterThanOrEqualToThreshold'
+      Period: '60'
+      EvaluationPeriods: '5'
+      TreatMissingData: 'notBreaching'
+  CPUUtilizationAlarm3:
+    Condition: IsDBMultiAZ
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'CPU_Utilization'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          Ref: AuroraDB3
+      MetricName: CPUUtilization
+      Statistic: Maximum
+      Namespace: 'AWS/RDS'
+      Threshold: '80'
+      Unit: Percent
+      ComparisonOperator: 'GreaterThanOrEqualToThreshold'
+      Period: '60'
+      EvaluationPeriods: '5'
+      TreatMissingData: 'notBreaching'
+  MaxUsedTxIDsAlarm1:
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'Maximum Used Transaction IDs'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          Ref: AuroraDB1
+      MetricName: 'MaximumUsedTransactionIDs'
+      Statistic: Average
+      Namespace: 'AWS/RDS'
+      Threshold: '600000000'
+      Unit: Count
+      ComparisonOperator: 'GreaterThanOrEqualToThreshold'
+      Period: '60'
+      EvaluationPeriods: '5'
+      TreatMissingData: 'notBreaching'
+  MaxUsedTxIDsAlarm2:
+    Condition: IsDBMultiAZ
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'Maximum Used Transaction IDs'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          Ref: AuroraDB2
+      MetricName: 'MaximumUsedTransactionIDs'
+      Statistic: Average
+      Namespace: 'AWS/RDS'
+      Threshold: '600000000'
+      Unit: Count
+      ComparisonOperator: 'GreaterThanOrEqualToThreshold'
+      Period: '60'
+      EvaluationPeriods: '5'
+      TreatMissingData: 'notBreaching'
+  MaxUsedTxIDsAlarm3:
+    Condition: IsDBMultiAZ
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'Maximum Used Transaction IDs'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          Ref: AuroraDB3
+      MetricName: 'MaximumUsedTransactionIDs'
+      Statistic: Average
+      Namespace: 'AWS/RDS'
+      Threshold: '600000000'
+      Unit: Count
+      ComparisonOperator: 'GreaterThanOrEqualToThreshold'
+      Period: '60'
+      EvaluationPeriods: '5'
+      TreatMissingData: 'notBreaching'
+  FreeLocalStorageAlarm1:
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'Free Local Storage'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          Ref: AuroraDB1
+      MetricName: 'FreeLocalStorage'
+      Statistic: Average
+      Namespace: 'AWS/RDS'
+      Threshold: '5368709120'
+      Unit: Bytes
+      ComparisonOperator: 'LessThanOrEqualToThreshold'
+      Period: '60'
+      EvaluationPeriods: '5'
+      TreatMissingData: 'notBreaching'
+  FreeLocalStorageAlarm2:
+    Condition: IsDBMultiAZ
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'Free Local Storage'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          Ref: AuroraDB2
+      MetricName: 'FreeLocalStorage'
+      Statistic: Average
+      Namespace: 'AWS/RDS'
+      Threshold: '5368709120'
+      Unit: Bytes
+      ComparisonOperator: 'LessThanOrEqualToThreshold'
+      Period: '60'
+      EvaluationPeriods: '5'
+      TreatMissingData: 'notBreaching'
+  FreeLocalStorageAlarm3:
+    Condition: IsDBMultiAZ
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'Free Local Storage'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          Ref: AuroraDB3
+      MetricName: 'FreeLocalStorage'
+      Statistic: Average
+      Namespace: 'AWS/RDS'
+      Threshold: '5368709120'
+      Unit: Bytes
+      ComparisonOperator: 'LessThanOrEqualToThreshold'
+      Period: '60'
+      EvaluationPeriods: '5'
+      TreatMissingData: 'notBreaching'
+  DatabaseClusterEventSubscription:
+    Type: 'AWS::RDS::EventSubscription'
+    Properties:
+      EventCategories:
+      - failover
+      - failure
+      - notification
+      SnsTopicArn: !Ref DBSNSTopic
+      SourceIds: [!Ref AuroraDBCluster]
+      SourceType: 'db-cluster'
+  DatabaseInstanceEventSubscription:
+    Type: 'AWS::RDS::EventSubscription'
+    Properties:
+      EventCategories:
+      - availability
+      - configuration change
+      - deletion
+      - failover
+      - failure
+      - maintenance
+      - notification
+      - recovery
+      SnsTopicArn: !Ref DBSNSTopic
+      SourceIds:
+      - !Ref AuroraDB1
+      - !If [IsDBMultiAZ, !Ref AuroraDB2, !Ref "AWS::NoValue"]
+	  - !If [IsDBMultiAZ, !Ref AuroraDB3, !Ref "AWS::NoValue"]
+      SourceType: 'db-instance'

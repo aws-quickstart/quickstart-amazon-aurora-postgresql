@@ -15,6 +15,7 @@ Metadata:
       - DBMasterUserPassword
       - DBPort
       - DBMultiAZ
+      - NotificationList
     - Label:
         default: Database Mandatory Tags
       Parameters:
@@ -76,6 +77,8 @@ Metadata:
         default: Quick Start S3 key prefix
       VPCCIDR:
         default: VPC CIDR
+      NotificationList:
+        default: SNS Notification Email
       EnvironmentStage:
         default: Environment Stage
       ApplicationVersion:
@@ -207,6 +210,11 @@ Parameters:
     MaxLength: "64"
     MinLength: "5"
     Type: String
+  NotificationList:
+    Type: String
+    Description: The Email notification list is used to configure a SNS topic for sending cloudwatch alarm and RDS Event notifications
+    AllowedPattern: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
+    ConstraintDescription: provide a valid email address.
   EnvironmentStage:
     Type: String
     Description: The environment tag is used to designate the Environment Stage of the associated AWS resource.
@@ -311,6 +319,7 @@ Resources:
         DBPort: !Ref DBPort
         DBMultiAZ: !Ref DBMultiAZ
         DBAccessCIDR: !Ref VPCCIDR
+        NotificationList: !Ref NotificationList
         EnvironmentStage: !Ref EnvironmentStage
         Application: !Ref Application
         ApplicationVersion: !Ref ApplicationVersion
