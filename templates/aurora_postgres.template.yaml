@@ -17,6 +17,7 @@ Metadata:
       - DBAccessCIDR
       - DBMultiAZ
       - DBAllocatedStorageEncrypted
+      - NotificationList
     - Label:
         default: Network Configuration
       Parameters:
@@ -24,6 +25,16 @@ Metadata:
       - Subnet2ID
       - CustomDBSecurityGroup
       - VPCID
+    - Label:
+        default: Mandatory Tags
+      Parameters:
+      - EnvironmentStage
+      - Application
+      - ApplicationVersion
+      - ProjectCostCenter
+      - ServiceOwnersEmailContact
+      - Confidentiality
+      - Compliance
     ParameterLabels:
       DBName:
         default: Database Name
@@ -53,6 +64,16 @@ Metadata:
         default: VPC Id
       CustomDBSecurityGroup:
         default: Custom Securiy Group
+      NotificationList:
+        default: SNS Notification Email
+      EnvironmentStage:
+        default: Environment Stage
+      ApplicationVersion:
+        default: Application Version
+      ProjectCostCenter:
+        default: Project Cost Center
+      ServiceOwnersEmailContact:
+        default: Service Owners Email Contact
 Conditions:
   IsDBMultiAZ:
     !Equals
@@ -176,7 +197,65 @@ Parameters:
     Description: "ID of the VPC you are deploying Aurora in (e.g., vpc-0343606e)"
     Type: 'AWS::EC2::VPC::Id'
     Default: ''
+  NotificationList:
+    Type: String
+    Description: The Email notification list is used to configure a SNS topic for sending cloudwatch alarm and RDS Event notifications
+    AllowedPattern: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
+    ConstraintDescription: provide a valid email address.
+  EnvironmentStage:
+    Type: String
+    Description: The environment tag is used to designate the Environment Stage of the associated AWS resource.
+    AllowedValues:
+      - dev
+      - test
+      - pre-prod
+      - prod
+    Default: prod
+  Application:
+    Type: String
+    Description: The Application tag is used to designate the application of the associated AWS resource. In this capacity application does not refer to an installed software component, but rather the overall business application that the resource supports.
+    AllowedPattern: "^[a-zA-Z]+[a-zA-Z ]+[a-zA-Z]+$"
+    ConstraintDescription: provide a valid application name containing only letters and spaces
+  ApplicationVersion:
+    Type: String
+    Description: The ApplicationVersion tag is used to designate the specific version of the application. Format should be in the Pattern - "#.#.#"
+    Default: '1.0.0'
+    AllowedPattern: '^[a-zA-Z0-9\.\-]+$'
+    ConstraintDescription: provide a valid application version
+  ProjectCostCenter:
+    Type: String
+    Description: The ProjectCostCenter tag is used to designate the cost center associated with the project of the given AWS resource.
+    AllowedPattern: "^[a-zA-Z0-9]+$"
+    ConstraintDescription:  provide a valid cost center
+  ServiceOwnersEmailContact:
+    Type: String
+    Description: The ServiceOwnersEmailContact tag is used to designate business owner(s) email address associated with the given AWS resource for sending outage or maintenance notifications
+    AllowedPattern: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
+    ConstraintDescription: provide a valid email address.
+  Confidentiality:
+    Type: String
+    Description: The Confidentiality tag is used to designate the confidentiality classification of the data that is associated with the resource.
+    AllowedValues:
+      - public
+      - private
+      - confidential
+      - pii/phi
+  Compliance:
+    Type: String
+    Description: The Compliance tag is used to specify the Compliance level for the AWS resource.
+    AllowedValues:
+      - hipaa
+      - sox
+      - fips
+      - other
+      - none
 Resources:
+  DBSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+      - Endpoint: !Ref NotificationList
+        Protocol: email
   EncryptionKey:
     Condition: UseDatabaseEncryption
     DeletionPolicy: Retain
@@ -208,10 +287,32 @@ Resources:
       DBInstanceClass: !Ref DBInstanceClass
       Engine: aurora-postgresql
       PubliclyAccessible: false
+      CopyTagsToSnapshot: true
       Tags:
         -
           Key: Name
           Value: !Sub AuroraDB-${AWS::StackName}
+        -
+          Key: EnvironmentStage
+          Value: !Ref EnvironmentStage
+        -
+          Key: Application
+          Value: !Ref Application
+        -
+          Key: ApplicationVersion
+          Value: !Ref ApplicationVersion
+        -
+          Key: ProjectCostCenter
+          Value: !Ref ProjectCostCenter
+        -
+          Key: ServiceOwnersEmailContact
+          Value: !Ref ServiceOwnersEmailContact
+        -
+          Key: Confidentiality
+          Value: !Ref Confidentiality
+        -
+          Key: Compliance
+          Value: !Ref Compliance
     Type: "AWS::RDS::DBInstance"
   AuroraDB2:
     Condition: IsDBMultiAZ
@@ -221,10 +322,32 @@ Resources:
       DBInstanceClass: !Ref DBInstanceClass
       Engine: aurora-postgresql
       PubliclyAccessible: false
+      CopyTagsToSnapshot: true
       Tags:
         -
           Key: Name
           Value: !Sub AuroraDB-${AWS::StackName}
+        -
+          Key: EnvironmentStage
+          Value: !Ref EnvironmentStage
+        -
+          Key: Application
+          Value: !Ref Application
+        -
+          Key: ApplicationVersion
+          Value: !Ref ApplicationVersion
+        -
+          Key: ProjectCostCenter
+          Value: !Ref ProjectCostCenter
+        -
+          Key: ServiceOwnersEmailContact
+          Value: !Ref ServiceOwnersEmailContact
+        -
+          Key: Confidentiality
+          Value: !Ref Confidentiality
+        -
+          Key: Compliance
+          Value: !Ref Compliance
     Type: "AWS::RDS::DBInstance"
   AuroraDB3:
     Condition: IsDBMultiAZ
@@ -234,15 +357,36 @@ Resources:
       DBInstanceClass: !Ref DBInstanceClass
       Engine: aurora-postgresql
       PubliclyAccessible: false
+      CopyTagsToSnapshot: true
       Tags:
         -
           Key: Name
           Value: !Sub AuroraDB-${AWS::StackName}
+        -
+          Key: EnvironmentStage
+          Value: !Ref EnvironmentStage
+        -
+          Key: Application
+          Value: !Ref Application
+        -
+          Key: ApplicationVersion
+          Value: !Ref ApplicationVersion
+        -
+          Key: ProjectCostCenter
+          Value: !Ref ProjectCostCenter
+        -
+          Key: ServiceOwnersEmailContact
+          Value: !Ref ServiceOwnersEmailContact
+        -
+          Key: Confidentiality
+          Value: !Ref Confidentiality
+        -
+          Key: Compliance
+          Value: !Ref Compliance
     Type: "AWS::RDS::DBInstance"
   AuroraDBCluster: 
     Properties: 
       BackupRetentionPeriod: !Ref DBBackupRetentionPeriod
-      CopyTagsToSnapshot: true
       DBClusterParameterGroupName: default.aurora-postgresql9.6
       DBSubnetGroupName: !Ref AuroraDBSubnetGroup
       DatabaseName:
@@ -260,6 +404,27 @@ Resources:
         - 
           Key: Name
           Value: !Sub AuroraDB-${AWS::StackName}
+        -
+          Key: EnvironmentStage
+          Value: !Ref EnvironmentStage
+        -
+          Key: Application
+          Value: !Ref Application
+        -
+          Key: ApplicationVersion
+          Value: !Ref ApplicationVersion
+        -
+          Key: ProjectCostCenter
+          Value: !Ref ProjectCostCenter
+        -
+          Key: ServiceOwnersEmailContact
+          Value: !Ref ServiceOwnersEmailContact
+        -
+          Key: Confidentiality
+          Value: !Ref Confidentiality
+        -
+          Key: Compliance
+          Value: !Ref Compliance
       VpcSecurityGroupIds: 
         !If
           - CreateSecurityGroup
@@ -281,14 +446,9 @@ Resources:
       SecurityGroupEgress: 
         - 
           CidrIp: 0.0.0.0/0
-          FromPort: 80
-          IpProtocol: tcp
-          ToPort: 80
-        - 
-          CidrIp: 0.0.0.0/0
-          FromPort: 443
-          IpProtocol: tcp
-          ToPort: 443
+          FromPort: -1
+          IpProtocol: -1
+          ToPort: -1
       SecurityGroupIngress: 
         - 
           CidrIp: !Ref DBAccessCIDR 
@@ -296,5 +456,229 @@ Resources:
           IpProtocol: tcp
           ToPort: !Ref DBPort
       VpcId: !Ref VPCID
+      Tags:
+      - Key: Name
+        Value: !Sub RDSSecurityGroup-${AWS::StackName}
     Type: "AWS::EC2::SecurityGroup"
-    
+  RDSSecurityGroupIngress:
+    Condition: CreateSecurityGroup
+    Properties:
+      GroupId: !GetAtt 'RDSSecurityGroup.GroupId'
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref RDSSecurityGroup
+      Description: 'Self Reference'
+    Type: 'AWS::EC2::SecurityGroupIngress'
+  CPUUtilizationAlarm1:
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'CPU_Utilization'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          Ref: AuroraDB1
+      MetricName: CPUUtilization
+      Statistic: Maximum
+      Namespace: 'AWS/RDS'
+      Threshold: '80'
+      Unit: Percent
+      ComparisonOperator: 'GreaterThanOrEqualToThreshold'
+      Period: '60'
+      EvaluationPeriods: '5'
+      TreatMissingData: 'notBreaching'
+  CPUUtilizationAlarm2:
+    Condition: IsDBMultiAZ
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'CPU_Utilization'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          Ref: AuroraDB2
+      MetricName: CPUUtilization
+      Statistic: Maximum
+      Namespace: 'AWS/RDS'
+      Threshold: '80'
+      Unit: Percent
+      ComparisonOperator: 'GreaterThanOrEqualToThreshold'
+      Period: '60'
+      EvaluationPeriods: '5'
+      TreatMissingData: 'notBreaching'
+  CPUUtilizationAlarm3:
+    Condition: IsDBMultiAZ
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'CPU_Utilization'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          Ref: AuroraDB3
+      MetricName: CPUUtilization
+      Statistic: Maximum
+      Namespace: 'AWS/RDS'
+      Threshold: '80'
+      Unit: Percent
+      ComparisonOperator: 'GreaterThanOrEqualToThreshold'
+      Period: '60'
+      EvaluationPeriods: '5'
+      TreatMissingData: 'notBreaching'
+  MaxUsedTxIDsAlarm1:
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'Maximum Used Transaction IDs'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          Ref: AuroraDB1
+      MetricName: 'MaximumUsedTransactionIDs'
+      Statistic: Average
+      Namespace: 'AWS/RDS'
+      Threshold: '600000000'
+      Unit: Count
+      ComparisonOperator: 'GreaterThanOrEqualToThreshold'
+      Period: '60'
+      EvaluationPeriods: '5'
+      TreatMissingData: 'notBreaching'
+  MaxUsedTxIDsAlarm2:
+    Condition: IsDBMultiAZ
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'Maximum Used Transaction IDs'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          Ref: AuroraDB2
+      MetricName: 'MaximumUsedTransactionIDs'
+      Statistic: Average
+      Namespace: 'AWS/RDS'
+      Threshold: '600000000'
+      Unit: Count
+      ComparisonOperator: 'GreaterThanOrEqualToThreshold'
+      Period: '60'
+      EvaluationPeriods: '5'
+      TreatMissingData: 'notBreaching'
+  MaxUsedTxIDsAlarm3:
+    Condition: IsDBMultiAZ
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'Maximum Used Transaction IDs'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          Ref: AuroraDB3
+      MetricName: 'MaximumUsedTransactionIDs'
+      Statistic: Average
+      Namespace: 'AWS/RDS'
+      Threshold: '600000000'
+      Unit: Count
+      ComparisonOperator: 'GreaterThanOrEqualToThreshold'
+      Period: '60'
+      EvaluationPeriods: '5'
+      TreatMissingData: 'notBreaching'
+  FreeLocalStorageAlarm1:
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'Free Local Storage'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          Ref: AuroraDB1
+      MetricName: 'FreeLocalStorage'
+      Statistic: Average
+      Namespace: 'AWS/RDS'
+      Threshold: '5368709120'
+      Unit: Bytes
+      ComparisonOperator: 'LessThanOrEqualToThreshold'
+      Period: '60'
+      EvaluationPeriods: '5'
+      TreatMissingData: 'notBreaching'
+  FreeLocalStorageAlarm2:
+    Condition: IsDBMultiAZ
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'Free Local Storage'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          Ref: AuroraDB2
+      MetricName: 'FreeLocalStorage'
+      Statistic: Average
+      Namespace: 'AWS/RDS'
+      Threshold: '5368709120'
+      Unit: Bytes
+      ComparisonOperator: 'LessThanOrEqualToThreshold'
+      Period: '60'
+      EvaluationPeriods: '5'
+      TreatMissingData: 'notBreaching'
+  FreeLocalStorageAlarm3:
+    Condition: IsDBMultiAZ
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'Free Local Storage'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          Ref: AuroraDB3
+      MetricName: 'FreeLocalStorage'
+      Statistic: Average
+      Namespace: 'AWS/RDS'
+      Threshold: '5368709120'
+      Unit: Bytes
+      ComparisonOperator: 'LessThanOrEqualToThreshold'
+      Period: '60'
+      EvaluationPeriods: '5'
+      TreatMissingData: 'notBreaching'
+  DatabaseClusterEventSubscription:
+    Type: 'AWS::RDS::EventSubscription'
+    Properties:
+      EventCategories:
+      - failover
+      - failure
+      - notification
+      SnsTopicArn: !Ref DBSNSTopic
+      SourceIds: [!Ref AuroraDBCluster]
+      SourceType: 'db-cluster'
+  DatabaseInstanceEventSubscription:
+    Type: 'AWS::RDS::EventSubscription'
+    Properties:
+      EventCategories:
+      - availability
+      - configuration change
+      - deletion
+      - failover
+      - failure
+      - maintenance
+      - notification
+      - recovery
+      SnsTopicArn: !Ref DBSNSTopic
+      SourceIds:
+      - !Ref AuroraDB1
+      - !If [IsDBMultiAZ, !Ref AuroraDB2, !Ref "AWS::NoValue"]
+      - !If [IsDBMultiAZ, !Ref AuroraDB3, !Ref "AWS::NoValue"]
+      SourceType: 'db-instance'

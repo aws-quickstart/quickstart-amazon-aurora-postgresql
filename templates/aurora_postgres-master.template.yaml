@@ -15,6 +15,17 @@ Metadata:
       - DBMasterUserPassword
       - DBPort
       - DBMultiAZ
+      - NotificationList
+    - Label:
+        default: Database Mandatory Tags
+      Parameters:
+      - EnvironmentStage
+      - Application
+      - ApplicationVersion
+      - ProjectCostCenter
+      - ServiceOwnersEmailContact
+      - Confidentiality
+      - Compliance
     - Label:
         default: Network Configuration
       Parameters:
@@ -66,6 +77,16 @@ Metadata:
         default: Quick Start S3 key prefix
       VPCCIDR:
         default: VPC CIDR
+      NotificationList:
+        default: SNS Notification Email
+      EnvironmentStage:
+        default: Environment Stage
+      ApplicationVersion:
+        default: Application Version
+      ProjectCostCenter:
+        default: Project Cost Center
+      ServiceOwnersEmailContact:
+        default: Service Owners Email Contact
 Parameters:
   AvailabilityZones:
    Description: >-
@@ -189,6 +210,58 @@ Parameters:
     MaxLength: "64"
     MinLength: "5"
     Type: String
+  NotificationList:
+    Type: String
+    Description: The Email notification list is used to configure a SNS topic for sending cloudwatch alarm and RDS Event notifications
+    AllowedPattern: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
+    ConstraintDescription: provide a valid email address.
+  EnvironmentStage:
+    Type: String
+    Description: The environment tag is used to designate the Environment Stage of the associated AWS resource.
+    AllowedValues:
+      - dev
+      - test
+      - pre-prod
+      - prod
+    Default: prod
+  Application:
+    Type: String
+    Description: The Application tag is used to designate the application of the associated AWS resource. In this capacity application does not refer to an installed software component, but rather the overall business application that the resource supports.
+    AllowedPattern: "^[a-zA-Z]+[a-zA-Z ]+[a-zA-Z]+$"
+    ConstraintDescription: provide a valid application name containing only letters and spaces
+  ApplicationVersion:
+    Type: String
+    Description: The ApplicationVersion tag is used to designate the specific version of the application. Format should be in the Pattern - "#.#.#"
+    Default: '1.0.0'
+    AllowedPattern: '^[a-zA-Z0-9\.\-]+$'
+    ConstraintDescription: provide a valid application version
+  ProjectCostCenter:
+    Type: String
+    Description: The ProjectCostCenter tag is used to designate the cost center associated with the project of the given AWS resource.
+    AllowedPattern: "^[a-zA-Z0-9]+$"
+    ConstraintDescription:  provide a valid cost center
+  ServiceOwnersEmailContact:
+    Type: String
+    Description: The ServiceOwnersEmailContact tag is used to designate business owner(s) email address associated with the given AWS resource for sending outage or maintenance notifications
+    AllowedPattern: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
+    ConstraintDescription: provide a valid email address.
+  Confidentiality:
+    Type: String
+    Description: The Confidentiality tag is used to designate the confidentiality classification of the data that is associated with the resource.
+    AllowedValues:
+      - public
+      - private
+      - confidential
+      - pii/phi
+  Compliance:
+    Type: String
+    Description: The Compliance tag is used to specify the Compliance level for the AWS resource.
+    AllowedValues:
+      - hipaa
+      - sox
+      - fips
+      - other
+      - none
 Conditions:
   GovCloudCondition: !Equals 
     - !Ref 'AWS::Region'
@@ -246,6 +319,14 @@ Resources:
         DBPort: !Ref DBPort
         DBMultiAZ: !Ref DBMultiAZ
         DBAccessCIDR: !Ref VPCCIDR
+        NotificationList: !Ref NotificationList
+        EnvironmentStage: !Ref EnvironmentStage
+        Application: !Ref Application
+        ApplicationVersion: !Ref ApplicationVersion
+        ProjectCostCenter: !Ref ProjectCostCenter
+        ServiceOwnersEmailContact: !Ref ServiceOwnersEmailContact
+        Confidentiality: !Ref Confidentiality
+        Compliance: !Ref Compliance
   BastionStack:
     Condition: EnableBastionAccess
     Type: 'AWS::CloudFormation::Stack'
