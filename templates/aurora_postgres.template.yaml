@@ -140,7 +140,7 @@ Parameters:
   DBAccessCIDR:
     AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$"
     ConstraintDescription: "CIDR block parameter must be in the form x.x.x.x/x"
-    Description: "Allowed CIDR block for external SSH access"
+    Description: "Allowed CIDR block for external access (use VPCCIDR)"
     Type: String
     Default: 10.0.0.0/16
   DBMasterUserPassword: 
