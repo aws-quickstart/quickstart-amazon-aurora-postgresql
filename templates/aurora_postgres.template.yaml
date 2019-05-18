@@ -447,7 +447,7 @@ Resources:
         - 
           CidrIp: 0.0.0.0/0
           FromPort: -1
-          IpProtocol: -1
+          IpProtocol: '-1'
           ToPort: -1
       SecurityGroupIngress: 
         - 
@@ -464,7 +464,7 @@ Resources:
     Condition: CreateSecurityGroup
     Properties:
       GroupId: !GetAtt 'RDSSecurityGroup.GroupId'
-      IpProtocol: -1
+      IpProtocol: '-1'
       SourceSecurityGroupId: !Ref RDSSecurityGroup
       Description: 'Self Reference'
     Type: 'AWS::EC2::SecurityGroupIngress'
