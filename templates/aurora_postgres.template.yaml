@@ -236,6 +236,7 @@ Resources:
   AuroraDBCluster: 
     Properties: 
       BackupRetentionPeriod: !Ref DBBackupRetentionPeriod
+      CopyTagsToSnapshot: true
       DBClusterParameterGroupName: default.aurora-postgresql9.6
       DBSubnetGroupName: !Ref AuroraDBSubnetGroup
       DatabaseName:
