@@ -142,9 +142,12 @@ Parameters:
     MinLength: "1"
     Type: String
   DBPort:
-    Default: 3306
+    Default: 5432
     Description: "The port the instance will listen for connections on"
     Type: Number
+    ConstraintDescription: 'Must be in the range [1115-65535]'
+    MinValue: 1150
+    MaxValue: 65535
   DBMultiAZ: 
     AllowedValues: 
       - "true"
