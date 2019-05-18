@@ -24,6 +24,16 @@ Metadata:
       - Subnet2ID
       - CustomDBSecurityGroup
       - VPCID
+    - Label:
+        default: Mandatory Tags
+      Parameters:
+      - EnvironmentStage
+      - Application
+      - ApplicationVersion
+      - ProjectCostCenter
+      - ServiceOwnersEmailContact
+      - Confidentiality
+      - Compliance
     ParameterLabels:
       DBName:
         default: Database Name
@@ -53,6 +63,14 @@ Metadata:
         default: VPC Id
       CustomDBSecurityGroup:
         default: Custom Securiy Group
+      EnvironmentStage:
+        default: Environment Stage
+      ApplicationVersion:
+        default: Application Version
+      ProjectCostCenter:
+        default: Project Cost Center
+      ServiceOwnersEmailContact:
+        default: Service Owners Email Contact
 Conditions:
   IsDBMultiAZ:
     !Equals
@@ -176,6 +194,53 @@ Parameters:
     Description: "ID of the VPC you are deploying Aurora in (e.g., vpc-0343606e)"
     Type: 'AWS::EC2::VPC::Id'
     Default: ''
+  EnvironmentStage:
+    Type: String
+    Description: The environment tag is used to designate the Environment Stage of the associated AWS resource.
+    AllowedValues:
+      - dev
+      - test
+      - pre-prod
+      - prod
+    Default: prod
+  Application:
+    Type: String
+    Description: The Application tag is used to designate the application of the associated AWS resource. In this capacity application does not refer to an installed software component, but rather the overall business application that the resource supports.
+    AllowedPattern: "^[a-zA-Z]+[a-zA-Z ]+[a-zA-Z]+$"
+    ConstraintDescription: provide a valid application name containing only letters and spaces
+  ApplicationVersion:
+    Type: String
+    Description: The ApplicationVersion tag is used to designate the specific version of the application. Format should be in the Pattern - "#.#.#"
+    Default: '1.0.0'
+    AllowedPattern: '^[a-zA-Z0-9\.\-]+$'
+    ConstraintDescription: provide a valid application version
+  ProjectCostCenter:
+    Type: String
+    Description: The ProjectCostCenter tag is used to designate the cost center associated with the project of the given AWS resource.
+    AllowedPattern: "^[a-zA-Z0-9]+$"
+    ConstraintDescription:  provide a valid cost center
+  ServiceOwnersEmailContact:
+    Type: String
+    Description: The ServiceOwnersEmailContact tag is used to designate business owner(s) email address associated with the given AWS resource for sending outage or maintenance notifications
+    AllowedPattern: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
+    ConstraintDescription: provide a valid email address.
+  Confidentiality:
+    Type: String
+    Description: The Confidentiality tag is used to designate the confidentiality classification of the data that is associated with the resource.
+    AllowedValues:
+      - public
+      - private
+      - confidential
+      - pii/phi
+  Compliance:
+    Type: String
+    Description: The Compliance tag is used to specify the Compliance level for the AWS resource.
+    AllowedValues:
+      - hipaa
+      - sox
+      - fips
+      - other
+      - none
 Resources:
   EncryptionKey:
     Condition: UseDatabaseEncryption
@@ -212,6 +277,27 @@ Resources:
         -
           Key: Name
           Value: !Sub AuroraDB-${AWS::StackName}
+        -
+          Key: EnvironmentStage
+          Value: !Ref EnvironmentStage
+        -
+          Key: Application
+          Value: !Ref Application
+        -
+          Key: ApplicationVersion
+          Value: !Ref ApplicationVersion
+        -
+          Key: ProjectCostCenter
+          Value: !Ref ProjectCostCenter
+        -
+          Key: ServiceOwnersEmailContact
+          Value: !Ref ServiceOwnersEmailContact
+        -
+          Key: Confidentiality
+          Value: !Ref Confidentiality
+        -
+          Key: Compliance
+          Value: !Ref Compliance
     Type: "AWS::RDS::DBInstance"
   AuroraDB2:
     Condition: IsDBMultiAZ
@@ -225,6 +311,27 @@ Resources:
         -
           Key: Name
           Value: !Sub AuroraDB-${AWS::StackName}
+        -
+          Key: EnvironmentStage
+          Value: !Ref EnvironmentStage
+        -
+          Key: Application
+          Value: !Ref Application
+        -
+          Key: ApplicationVersion
+          Value: !Ref ApplicationVersion
+        -
+          Key: ProjectCostCenter
+          Value: !Ref ProjectCostCenter
+        -
+          Key: ServiceOwnersEmailContact
+          Value: !Ref ServiceOwnersEmailContact
+        -
+          Key: Confidentiality
+          Value: !Ref Confidentiality
+        -
+          Key: Compliance
+          Value: !Ref Compliance
     Type: "AWS::RDS::DBInstance"
   AuroraDB3:
     Condition: IsDBMultiAZ
@@ -238,6 +345,27 @@ Resources:
         -
           Key: Name
           Value: !Sub AuroraDB-${AWS::StackName}
+        -
+          Key: EnvironmentStage
+          Value: !Ref EnvironmentStage
+        -
+          Key: Application
+          Value: !Ref Application
+        -
+          Key: ApplicationVersion
+          Value: !Ref ApplicationVersion
+        -
+          Key: ProjectCostCenter
+          Value: !Ref ProjectCostCenter
+        -
+          Key: ServiceOwnersEmailContact
+          Value: !Ref ServiceOwnersEmailContact
+        -
+          Key: Confidentiality
+          Value: !Ref Confidentiality
+        -
+          Key: Compliance
+          Value: !Ref Compliance
     Type: "AWS::RDS::DBInstance"
   AuroraDBCluster: 
     Properties: 
@@ -260,6 +388,27 @@ Resources:
         - 
           Key: Name
           Value: !Sub AuroraDB-${AWS::StackName}
+        -
+          Key: EnvironmentStage
+          Value: !Ref EnvironmentStage
+        -
+          Key: Application
+          Value: !Ref Application
+        -
+          Key: ApplicationVersion
+          Value: !Ref ApplicationVersion
+        -
+          Key: ProjectCostCenter
+          Value: !Ref ProjectCostCenter
+        -
+          Key: ServiceOwnersEmailContact
+          Value: !Ref ServiceOwnersEmailContact
+        -
+          Key: Confidentiality
+          Value: !Ref Confidentiality
+        -
+          Key: Compliance
+          Value: !Ref Compliance
       VpcSecurityGroupIds: 
         !If
           - CreateSecurityGroup
@@ -291,6 +440,9 @@ Resources:
           IpProtocol: tcp
           ToPort: !Ref DBPort
       VpcId: !Ref VPCID
+      Tags:
+      - Key: Name
+        Value: !Sub RDSSecurityGroup-${AWS::StackName}
     Type: "AWS::EC2::SecurityGroup"
   RDSSecurityGroupIngress:
     Condition: CreateSecurityGroup
