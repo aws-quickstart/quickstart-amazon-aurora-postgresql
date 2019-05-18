@@ -204,6 +204,7 @@ Resources:
       DBClusterIdentifier: !Ref AuroraDBCluster
       DBInstanceClass: !Ref DBInstanceClass
       Engine: aurora-postgresql
+      PubliclyAccessible: false
       Tags:
         -
           Key: Name
@@ -216,6 +217,7 @@ Resources:
       DBClusterIdentifier: !Ref AuroraDBCluster
       DBInstanceClass: !Ref DBInstanceClass
       Engine: aurora-postgresql
+      PubliclyAccessible: false
       Tags:
         -
           Key: Name
@@ -228,6 +230,7 @@ Resources:
       DBClusterIdentifier: !Ref AuroraDBCluster
       DBInstanceClass: !Ref DBInstanceClass
       Engine: aurora-postgresql
+      PubliclyAccessible: false
       Tags:
         -
           Key: Name
