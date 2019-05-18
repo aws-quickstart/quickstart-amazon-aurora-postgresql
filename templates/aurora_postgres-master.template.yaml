@@ -131,7 +131,7 @@ Parameters:
     AllowedValues: 
       - "true"
       - "false"
-    Default: "true"
+    Default: "false"
     Description: "Select true/false to setup Auto Minor Version upgrade"
     Type: String
   DBBackupRetentionPeriod: 
