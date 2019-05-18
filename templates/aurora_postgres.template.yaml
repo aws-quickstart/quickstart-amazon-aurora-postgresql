@@ -259,6 +259,7 @@ Resources:
           - [!Ref RDSSecurityGroup]
           - [!Ref CustomDBSecurityGroup]
     Type: "AWS::RDS::DBCluster"
+    UpdateReplacePolicy: Snapshot
   AuroraDBSubnetGroup: 
     Properties: 
       DBSubnetGroupDescription: "Subnets available for the Amazon Aurora database instance"
