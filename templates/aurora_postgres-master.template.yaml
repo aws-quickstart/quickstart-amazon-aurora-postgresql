@@ -79,10 +79,20 @@ Metadata:
         default: SNS Notification Email
       EnvironmentStage:
         default: Environment Stage
+      Application:
+        default: Application Name
       ApplicationVersion:
         default: Application Version
+      Compliance:
+        default: Compliance classifier
+      Confidentiality:
+        default: Confidentiality classifier
       ProjectCostCenter:
         default: Project Cost Center
+      KeyPairName:
+        default: Key Name
+      RemoteAccessCIDR:
+        default: Permitted IP range
 Parameters:
   AvailabilityZones:
    Description: >-
