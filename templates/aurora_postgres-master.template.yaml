@@ -28,6 +28,7 @@ Metadata:
       - DBMasterUsername
       - DBMasterUserPassword
       - DBPort
+      - DBAllocatedStorageEncrypted
       - DBMultiAZ
       - NotificationList
     - Label:
@@ -49,6 +50,8 @@ Metadata:
         default: Availability Zones
       DBName:
         default: Database name
+      DBAllocatedStorageEncrypted:
+        default: Database encryption enabled
       DBAutoMinorVersionUpgrade:
         default: Database auto minor version upgrade
       DBBackupRetentionPeriod:
@@ -161,6 +164,13 @@ Parameters:
       - "false"
     Default: "true"
     Description: "If true, a bastion stack will be created."
+    Type: String
+  DBAllocatedStorageEncrypted:
+    Default: true
+    AllowedValues:
+      - true
+      - false
+    Description: Whether or not to encrypt the database.
     Type: String
   DBAutoMinorVersionUpgrade: 
     AllowedValues: 
@@ -320,6 +330,7 @@ Resources:
           - Outputs.VPCID
         DBName: !Ref DBName
         DBAutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
+        DBAllocatedStorageEncrypted: !Ref DBAllocatedStorageEncrypted
         DBBackupRetentionPeriod: !Ref DBBackupRetentionPeriod
         DBInstanceClass: !Ref DBInstanceClass
         DBMasterUsername: !Ref DBMasterUsername
