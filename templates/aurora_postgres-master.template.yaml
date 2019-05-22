@@ -4,7 +4,22 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
     - Label:
-        default: Database Configuration
+        default: Network configuration
+      Parameters:
+      - KeyPairName
+      - AvailabilityZones
+      - VPCCIDR
+      - PrivateSubnet1CIDR
+      - PrivateSubnet2CIDR
+      - PublicSubnet1CIDR
+      - PublicSubnet2CIDR
+    - Label:
+        default: Linux bastion configuration
+      Parameters:
+       - EnableBastion
+       - RemoteAccessCIDR
+    - Label:
+        default: Database configuration
       Parameters:
       - DBName
       - DBAutoMinorVersionUpgrade
@@ -16,7 +31,7 @@ Metadata:
       - DBMultiAZ
       - NotificationList
     - Label:
-        default: Database Tags (optional)
+        default: Database tags (optional)
       Parameters:
       - EnvironmentStage
       - Application
@@ -25,22 +40,7 @@ Metadata:
       - Confidentiality
       - Compliance
     - Label:
-        default: Network Configuration
-      Parameters:
-      - KeyPairName
-      - AvailabilityZones
-      - PrivateSubnet1CIDR
-      - PrivateSubnet2CIDR
-      - PublicSubnet1CIDR
-      - PublicSubnet2CIDR
-      - VPCCIDR
-    - Label:
-        default: Linux Bastion Configuration
-      Parameters:
-       - EnableBastion
-       - RemoteAccessCIDR
-    - Label:
-        default: QuickStart Configuration
+        default: Quick Start configuration
       Parameters:
       - QSS3BucketName
       - QSS3KeyPrefix
@@ -48,27 +48,31 @@ Metadata:
       AvailabilityZones:
         default: Availability Zones
       DBName:
-        default: Database Name
+        default: Database name
       DBAutoMinorVersionUpgrade:
-        default: Database Auto Minor Version Upgrade
+        default: Database auto minor version upgrade
       DBBackupRetentionPeriod:
-        default: Database Backup Retention Period
+        default: Database backup retention period
       DBInstanceClass:
-        default: Database Instance Class
+        default: Database instance class
       DBMasterUsername:
-        default: Database Master Username
+        default: Database master username
       DBMasterUserPassword:
-        default: Database Master Password
+        default: Database master password
       DBPort:
-        default: Database Port
+        default: Database port
       DBMultiAZ:
-        default: Single or MultiAZ Deployment
+        default: Multi-AZ deployment
       EnableBastion:
-        default: Create Bastion Stack
+        default: Create bastion stack
       PrivateSubnet1CIDR:
         default: Private subnet 1 CIDR
       PrivateSubnet2CIDR:
         default: Private subnet 2 CIDR
+      PublicSubnet1CIDR:
+        default: Public subnet 1 CIDR
+      PublicSubnet2CIDR:
+        default: Public subnet 2 CIDR
       QSS3BucketName:
         default: Quick Start S3 bucket name
       QSS3KeyPrefix:
@@ -76,19 +80,19 @@ Metadata:
       VPCCIDR:
         default: VPC CIDR
       NotificationList:
-        default: SNS Notification Email
+        default: SNS notification email
       EnvironmentStage:
-        default: Environment Stage
+        default: Environment stage
       Application:
-        default: Application Name
+        default: Application name
       ApplicationVersion:
-        default: Application Version
+        default: Application version
       Compliance:
         default: Compliance classifier
       Confidentiality:
         default: Confidentiality classifier
       ProjectCostCenter:
-        default: Project Cost Center
+        default: Project cost center
       KeyPairName:
         default: Key Name
       RemoteAccessCIDR:
@@ -101,42 +105,43 @@ Parameters:
       your selections is preserved.
    Type: 'List<AWS::EC2::AvailabilityZone::Name>'
   KeyPairName:
-    ConstraintDescription: "Name of an existing EC2 KeyPair."
+    ConstraintDescription: "Name of an existing EC2 key pair."
+    Description: Name of an existing public/private key pair, for connecting to your instance.
     Type: "AWS::EC2::KeyPair::KeyName"
   PrivateSubnet1CIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
     Default: 10.0.0.0/19
-    Description: CIDR block for private subnet 1 located in Availability Zone 1
+    Description: CIDR block for private subnet 1 located in Availability Zone 1.
     Type: String
   PrivateSubnet2CIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
     Default: 10.0.32.0/19
-    Description: CIDR block for private subnet 2 located in Availability Zone 2
+    Description: CIDR block for private subnet 2 located in Availability Zone 2.
     Type: String
   PublicSubnet1CIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
     Default: 10.0.128.0/20
-    Description: CIDR block for the public (DMZ) subnet 1 located in Availability Zone 1
+    Description: CIDR block for the public subnet 1 located in Availability Zone 1.
     Type: String
   PublicSubnet2CIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
     Default: 10.0.144.0/20
-    Description: CIDR block for the public (DMZ) subnet 2 located in Availability Zone 2
+    Description: CIDR block for the public subnet 2 located in Availability Zone 2.
     Type: String
   RemoteAccessCIDR:
     AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$"
     ConstraintDescription: "CIDR block parameter must be in the form x.x.x.x/x"
-    Description: "Allowed CIDR block for external SSH access"
+    Description: "Allowed CIDR block for external SSH access."
     Type: String
   VPCCIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
     Default: 10.0.0.0/16
-    Description: CIDR block for the VPC
+    Description: CIDR block for the VPC.
     Type: String
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
@@ -155,14 +160,14 @@ Parameters:
       - "true"
       - "false"
     Default: "true"
-    Description: "If ture a Bastion stack will be created"
+    Description: "If true, a bastion stack will be created."
     Type: String
   DBAutoMinorVersionUpgrade: 
     AllowedValues: 
       - "true"
       - "false"
     Default: "false"
-    Description: "Select true/false to setup Auto Minor Version upgrade"
+    Description: "Select true to set up auto minor version upgrade."
     Type: String
   DBBackupRetentionPeriod: 
     Default: "35"
@@ -182,24 +187,24 @@ Parameters:
   DBMasterUserPassword: 
     AllowedPattern: "(?=^.{6,255}$)((?=.*\\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\\d)(?=.*[^A-Za-z0-9])(?=.*[a-z])|(?=.*[^A-Za-z0-9])(?=.*[A-Z])(?=.*[a-z])|(?=.*\\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9]))^.*"
     ConstraintDescription: "Min 8 chars."
-    Description: "The database admin account password"
+    Description: "The database admin account password."
     MaxLength: "64"
     MinLength: "8"
     NoEcho: "True"
     Type: String
   DBMasterUsername: 
     AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
-    ConstraintDescription: "must begin with a letter and contain only alphanumeric characters."
+    ConstraintDescription: "Must begin with a letter and contain only alphanumeric characters."
     Default: pgadmin
-    Description: "The database admin account username"
+    Description: "The database admin account username."
     MaxLength: "16"
     MinLength: "1"
     Type: String
   DBPort:
     Default: 5432
-    Description: "The port the instance will listen for connections on"
+    Description: "The port the instance will listen for connections on."
     Type: Number
-    ConstraintDescription: 'Must be in the range [1115-65535]'
+    ConstraintDescription: 'Must be in the range [1115-65535].'
     MinValue: 1150
     MaxValue: 65535
   DBMultiAZ: 
@@ -212,7 +217,7 @@ Parameters:
   DBName: 
     AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
     Default: 'AuroraPostgresDB'
-    Description: "Name of the Amazon Aurora database"
+    Description: "Name of the Amazon Aurora database."
     MaxLength: "64"
     MinLength: "5"
     Type: String
@@ -224,7 +229,7 @@ Parameters:
     ConstraintDescription: provide a valid email address.
   EnvironmentStage:
     Type: String
-    Description: The environment tag is used to designate the Environment Stage of the associated AWS resource. (optional)
+    Description: Designates the environment stage of the associated AWS resource. (Optional)
     AllowedValues:
       - dev
       - test
@@ -235,20 +240,20 @@ Parameters:
   Application:
     Type: String
     Default: ''
-    Description: The Application tag is used to designate the application of the associated AWS resource. (optional)
+    Description: Designates the application of the associated AWS resource. (Optional)
   ApplicationVersion:
     Type: String
-    Description: The ApplicationVersion tag is used to designate the specific version of the application. (optional)
+    Description: Designates the specific version of the application. (Optional)
     Default: ''
   ProjectCostCenter:
     Type: String
     Default: ''
-    Description: The ProjectCostCenter tag is used to designate the cost center associated with the project of the given AWS resource. (optional)
+    Description: Designates the cost center associated with the project of the given AWS resource. (Optional)
     ConstraintDescription: Provide a valid email address.
   Confidentiality:
     Type: String
     Default: ''
-    Description: The Confidentiality tag is used to designate the confidentiality classification of the data that is associated with the resource. (optional)
+    Description: Designates the confidentiality classification of the data that is associated with the resource. (Optional)
     AllowedValues:
       - public
       - private
@@ -259,7 +264,7 @@ Parameters:
   Compliance:
     Type: String
     Default: ''
-    Description: The Compliance tag is used to specify the Compliance level for the AWS resource. (optional)
+    Description: Designates the compliance level for the AWS resource. (Optional)
     AllowedValues:
       - hipaa
       - sox
