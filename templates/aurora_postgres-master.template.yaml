@@ -249,7 +249,6 @@ Parameters:
     Type: String
     Default: ''
     Description: Designates the cost center associated with the project of the given AWS resource. (Optional)
-    ConstraintDescription: Provide a valid email address.
   Confidentiality:
     Type: String
     Default: ''
