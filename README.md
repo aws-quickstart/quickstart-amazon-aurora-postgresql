@@ -9,8 +9,8 @@ This Quick Start is for users who are looking for a repeatable, customizable ref
 
 The Quick Start offers two deployment options:
 
-- Deploying Aurora PostgreSQL into a new virtual private cloud (VPC) on AWS (use the [aurora_postgres-master.template.yaml template](https://github.com/aws-quickstart/quickstart-amazon-aurora/blob/develop/templates/aurora_postgres-master.template.yaml).
-- Deploying Aurora PostgreSQL into an existing VPC on AWS (use the [aurora_postgres.template.yaml template](https://github.com/aws-quickstart/quickstart-amazon-aurora/blob/develop/templates/aurora_postgres.template.yaml). This template builds only the Aurora database components and is designed to plug into your existing AWS CloudFormation templates as a drop-in PostgreSQL database replacement.
+- Deploying Aurora PostgreSQL into a new virtual private cloud (VPC) on AWS (use the [aurora_postgres-master.template.yaml template](https://github.com/aws-quickstart/quickstart-amazon-aurora/blob/develop/templates/aurora_postgres-master.template.yaml)).
+- Deploying Aurora PostgreSQL into an existing VPC on AWS (use the [aurora_postgres.template.yaml template](https://github.com/aws-quickstart/quickstart-amazon-aurora/blob/develop/templates/aurora_postgres.template.yaml)). This template builds only the Aurora database components and is designed to plug into your existing AWS CloudFormation templates as a drop-in PostgreSQL database replacement.
 
 ![Quick Start architecture for Aurora PostgreSQL](https://d0.awsstatic.com/partner-network/QuickStart/datasheets/amazon-aurora-quick-start-architecture.png)
 
