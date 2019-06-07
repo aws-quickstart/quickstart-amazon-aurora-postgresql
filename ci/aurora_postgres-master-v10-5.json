@@ -24,6 +24,10 @@
         "ParameterValue": "false"
     },
     {
+        "ParameterKey": "DBEngineVersion",
+        "ParameterValue": "10.5"
+    },
+    {
         "ParameterKey": "DBMasterUserPassword",
         "ParameterValue": "$[taskcat_genpass_8A]"
     }
