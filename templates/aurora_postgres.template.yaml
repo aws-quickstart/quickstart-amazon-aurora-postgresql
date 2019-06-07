@@ -311,6 +311,7 @@ Resources:
       DBInstanceClass: !Ref DBInstanceClass
       Engine: aurora-postgresql
       EngineVersion: !Ref DBEngineVersion
+      DBParameterGroupName: !Ref DBParamGroup
       PubliclyAccessible: false
       CopyTagsToSnapshot: true
       Tags:
@@ -344,6 +345,7 @@ Resources:
       DBInstanceClass: !Ref DBInstanceClass
       Engine: aurora-postgresql
       EngineVersion: !Ref DBEngineVersion
+      DBParameterGroupName: !Ref DBParamGroup
       PubliclyAccessible: false
       CopyTagsToSnapshot: true
       Tags:
@@ -377,6 +379,7 @@ Resources:
       DBInstanceClass: !Ref DBInstanceClass
       EngineVersion: !Ref DBEngineVersion
       Engine: aurora-postgresql
+      DBParameterGroupName: !Ref DBParamGroup
       PubliclyAccessible: false
       CopyTagsToSnapshot: true
       Tags:
@@ -402,6 +405,14 @@ Resources:
           Key: Compliance
           Value: !Ref Compliance
     Type: "AWS::RDS::DBInstance"
+  DBParamGroup:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      Description: !Join [ "- ", [ "Aurora PG Database Instance Parameter Group for Cloudformation Stack ", !Ref DBName ] ]
+      Family: !FindInMap [DBFamilyMap, !Ref DBEngineVersion, "family"] 
+      Parameters:
+        log_rotation_age: '1440'
+        log_rotation_size: '102400'
   RDSDBClusterParameterGroup:
     Type: AWS::RDS::DBClusterParameterGroup
     Properties:
