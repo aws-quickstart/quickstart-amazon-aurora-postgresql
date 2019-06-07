@@ -24,8 +24,8 @@ tests:
   #    - ca-central-1
   #    - eu-west-2
   #    - ap-southeast-1
-  postgres-v10-4:
-    parameter_input: aurora_postgres-master-v10-4.json
+  postgres-v10-5:
+    parameter_input: aurora_postgres-master-v10-5.json
     template_file: aurora_postgres-master.template.yaml
     regions:
     - ap-northeast-1

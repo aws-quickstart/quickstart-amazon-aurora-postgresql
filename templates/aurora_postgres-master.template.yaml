@@ -192,8 +192,11 @@ Parameters:
     Default: 9.6.9
     AllowedValues:
       - 9.6.9
-      - 10.4
+      - 9.6.11
+      - 9.6.12
       - 10.5
+      - 10.6
+      - 10.7
   DBInstanceClass: 
     AllowedValues: 
       - db.r4.large
@@ -201,6 +204,7 @@ Parameters:
       - db.r4.2xlarge
       - db.r4.4xlarge
       - db.r4.8xlarge
+      - db.r4.16xlarge
     ConstraintDescription: "Must select a valid database instance type."
     Default: db.r4.large
     Description: "The name of the compute and memory capacity class of the database instance."
