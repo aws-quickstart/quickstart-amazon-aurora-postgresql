@@ -17,6 +17,7 @@ Metadata:
       - DBName
       - DBAutoMinorVersionUpgrade
       - DBBackupRetentionPeriod
+      - DBEngineVersion
       - DBInstanceClass
       - DBMasterUsername
       - DBMasterUserPassword
@@ -37,6 +38,8 @@ Metadata:
     ParameterLabels:
       DBName:
         default: Database name
+      DBEngineVersion:
+        default: Database Engine Version
       DBAllocatedStorageEncrypted:
         default: Database encryption enabled
       DBAutoMinorVersionUpgrade:
@@ -77,6 +80,18 @@ Metadata:
        default: Confidentiality classifier
       ProjectCostCenter:
        default: Project cost center
+Mappings: 
+  DBFamilyMap: 
+    "9.6.9": 
+      "family": "aurora-postgresql9.6"
+    "9.6.11": 
+      "family": "aurora-postgresql9.6"
+    "10.5":
+      "family": "aurora-postgresql10"
+    "10.6":
+      "family": "aurora-postgresql10"
+    "10.7":
+      "family": "aurora-postgresql10"
 Conditions:
   IsDBMultiAZ:
     !Equals
@@ -131,6 +146,17 @@ Parameters:
     Default: "35"
     Description: "The number of days for which automatic database snapshots are retained."
     Type: String
+  DBEngineVersion:
+    Description: Select Database Engine Version
+    Type: String
+    Default: 9.6.9
+    AllowedValues:
+      - 9.6.9
+      - 9.6.11
+      - 9.6.12
+      - 10.5
+      - 10.6
+      - 10.7
   DBInstanceClass: 
     AllowedValues: 
       - db.r4.large
@@ -285,6 +311,8 @@ Resources:
       DBClusterIdentifier: !Ref AuroraDBCluster
       DBInstanceClass: !Ref DBInstanceClass
       Engine: aurora-postgresql
+      EngineVersion: !Ref DBEngineVersion
+      DBParameterGroupName: !Ref DBParamGroup
       PubliclyAccessible: false
       CopyTagsToSnapshot: true
       Tags:
@@ -317,6 +345,8 @@ Resources:
       DBClusterIdentifier: !Ref AuroraDBCluster
       DBInstanceClass: !Ref DBInstanceClass
       Engine: aurora-postgresql
+      EngineVersion: !Ref DBEngineVersion
+      DBParameterGroupName: !Ref DBParamGroup
       PubliclyAccessible: false
       CopyTagsToSnapshot: true
       Tags:
@@ -348,7 +378,9 @@ Resources:
       AutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
       DBClusterIdentifier: !Ref AuroraDBCluster
       DBInstanceClass: !Ref DBInstanceClass
+      EngineVersion: !Ref DBEngineVersion
       Engine: aurora-postgresql
+      DBParameterGroupName: !Ref DBParamGroup
       PubliclyAccessible: false
       CopyTagsToSnapshot: true
       Tags:
@@ -374,10 +406,26 @@ Resources:
           Key: Compliance
           Value: !Ref Compliance
     Type: "AWS::RDS::DBInstance"
+  DBParamGroup:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      Description: !Join [ "- ", [ "Aurora PG Database Instance Parameter Group for Cloudformation Stack ", !Ref DBName ] ]
+      Family: !FindInMap [DBFamilyMap, !Ref DBEngineVersion, "family"] 
+      Parameters:
+        log_rotation_age: '1440'
+        log_rotation_size: '102400'
+  RDSDBClusterParameterGroup:
+    Type: AWS::RDS::DBClusterParameterGroup
+    Properties:
+      Description: !Join [ "- ", [ "Aurora PG Cluster Parameter Group for  Cloudformation Stack ", !Ref DBName ] ]
+      Family: !FindInMap [DBFamilyMap, !Ref DBEngineVersion, "family"] 
+      Parameters:
+        rds.force_ssl: 0
   AuroraDBCluster: 
+    Type: "AWS::RDS::DBCluster"
     Properties: 
       BackupRetentionPeriod: !Ref DBBackupRetentionPeriod
-      DBClusterParameterGroupName: default.aurora-postgresql9.6
+      DBClusterParameterGroupName: !Ref RDSDBClusterParameterGroup
       DBSubnetGroupName: !Ref AuroraDBSubnetGroup
       DatabaseName:
         !If
@@ -385,6 +433,7 @@ Resources:
         - !Ref DBName
         - !Ref AWS::NoValue
       Engine: aurora-postgresql
+      EngineVersion: !Ref DBEngineVersion
       KmsKeyId: !If [UseDatabaseEncryption, !GetAtt EncryptionKey.Arn, !Ref 'AWS::NoValue']
       MasterUserPassword: !Ref DBMasterUserPassword
       MasterUsername: !Ref DBMasterUsername
@@ -417,7 +466,6 @@ Resources:
           - CreateSecurityGroup
           - [!Ref RDSSecurityGroup]
           - [!Ref CustomDBSecurityGroup]
-    Type: "AWS::RDS::DBCluster"
     UpdateReplacePolicy: Snapshot
   AuroraDBSubnetGroup: 
     Properties: 

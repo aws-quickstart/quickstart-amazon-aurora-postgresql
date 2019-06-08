@@ -24,6 +24,7 @@ Metadata:
       - DBName
       - DBAutoMinorVersionUpgrade
       - DBBackupRetentionPeriod
+      - DBEngineVersion
       - DBInstanceClass
       - DBMasterUsername
       - DBMasterUserPassword
@@ -48,6 +49,8 @@ Metadata:
     ParameterLabels:
       AvailabilityZones:
         default: Availability Zones
+      DBEngineVersion:
+        default: Database Engine Version
       DBName:
         default: Database name
       DBAllocatedStorageEncrypted:
@@ -183,6 +186,17 @@ Parameters:
     Default: "35"
     Description: "The number of days for which automatic database snapshots are retained."
     Type: String
+  DBEngineVersion:
+    Description: Select Database Engine Version
+    Type: String
+    Default: 9.6.9
+    AllowedValues:
+      - 9.6.9
+      - 9.6.11
+      - 9.6.12
+      - 10.5
+      - 10.6
+      - 10.7
   DBInstanceClass: 
     AllowedValues: 
       - db.r4.large
@@ -190,6 +204,7 @@ Parameters:
       - db.r4.2xlarge
       - db.r4.4xlarge
       - db.r4.8xlarge
+      - db.r4.16xlarge
     ConstraintDescription: "Must select a valid database instance type."
     Default: db.r4.large
     Description: "The name of the compute and memory capacity class of the database instance."
@@ -332,6 +347,7 @@ Resources:
         DBAutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
         DBAllocatedStorageEncrypted: !Ref DBAllocatedStorageEncrypted
         DBBackupRetentionPeriod: !Ref DBBackupRetentionPeriod
+        DBEngineVersion: !Ref DBEngineVersion
         DBInstanceClass: !Ref DBInstanceClass
         DBMasterUsername: !Ref DBMasterUsername
         DBMasterUserPassword: !Ref DBMasterUserPassword
