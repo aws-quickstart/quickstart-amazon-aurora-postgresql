@@ -86,6 +86,8 @@ Mappings:
       "family": "aurora-postgresql9.6"
     "9.6.11": 
       "family": "aurora-postgresql9.6"
+    "9.6.12":
+      "family": "aurora-postgresql9.6"
     "10.5":
       "family": "aurora-postgresql10"
     "10.6":
