@@ -262,14 +262,14 @@ Parameters:
   DBMasterUsername: 
     AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
     ConstraintDescription: "Must begin with a letter and contain only alphanumeric characters."
-    Default: pgadmin
+    Default: msadmin
     Description: "The database admin account username."
     MaxLength: "16"
     MinLength: "1"
     Type: String
   DBPort:
-    Default: 5432
-    Description: "The port the instance will listen for connections on."
+    Default: 3306
+    Description: "The port the instance will listen for connections on. Serverless engine mode supports port 3306."
     Type: Number
     ConstraintDescription: 'Must be in the range [1115-65535].'
     MinValue: 1150
@@ -283,7 +283,7 @@ Parameters:
     Type: String
   DBName: 
     AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
-    Default: 'AuroraPostgresDB'
+    Default: 'AuroraMySQLDB'
     Description: "Name of the Amazon Aurora database."
     MaxLength: "64"
     MinLength: "5"
@@ -337,6 +337,45 @@ Parameters:
       - fips
       - other
       - ''
+  ServerlessMinCapacityUnit:
+    Description: The minimum capacity for an Aurora DB cluster in serverless DB engine mode. The minimum capacity must be less than or equal to the maximum capacity.
+    Type: String
+    Default: '2'
+    AllowedValues:
+    - '2'
+    - '4'
+    - '8'
+    - '16'
+    - '32'
+    - '64'
+    - '128'
+    - '256'
+  ServerlessMaxCapacityUnit:
+    Description: The maximum capacity for an Aurora DB cluster in serverless DB engine mode. The maximum capacity must be greater than or equal to the minimum capacity.
+    Type: String
+    Default: '64'
+    AllowedValues:
+    - '2'
+    - '4'
+    - '8'
+    - '16'
+    - '32'
+    - '64'
+    - '128'
+    - '256'    
+  ServerlessAutoPause:
+    Description: Specifies whether to allow or disallow automatic pause for an Aurora DB cluster in serverless DB engine mode. A DB cluster can be paused only when its idle (it has no connections).
+    Type: String
+    Default: 'false'
+    AllowedValues:
+    - 'true'
+    - 'false'
+  ServerlessSecondsUntilAutoPause:
+    Description: The time, in seconds, before an Aurora DB cluster in serverless mode is auto paused. Min = 300, Max = 86400 (24hrs)
+    Type: Number
+    Default: 300
+    MaxValue: 86400
+    MinValue: 300
 Conditions:
   GovCloudCondition: !Equals 
     - !Ref 'AWS::Region'
@@ -370,7 +409,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub 
-        - https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}templates/aurora_postgres.template.yaml
+        - https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}templates/aurora_mysql.template.yaml
         - QSS3Region: !If [GovCloudCondition , s3-us-gov-west-1 , s3]
       Parameters:
         Subnet1ID:
