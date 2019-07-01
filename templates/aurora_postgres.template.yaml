@@ -81,11 +81,11 @@ Metadata:
       ProjectCostCenter:
        default: Project cost center
 
-Mappings: 
-  DBFamilyMap: 
-    "9.6.9": 
+Mappings:
+  DBFamilyMap:
+    "9.6.9":
       "family": "aurora-postgresql9.6"
-    "9.6.11": 
+    "9.6.11":
       "family": "aurora-postgresql9.6"
     "9.6.12":
       "family": "aurora-postgresql9.6"
@@ -95,7 +95,6 @@ Mappings:
       "family": "aurora-postgresql10"
     "10.7":
       "family": "aurora-postgresql10"
-
 Conditions:
   IsDBMultiAZ:
     !Equals
@@ -115,7 +114,7 @@ Conditions:
     - !Ref CustomDBSecurityGroup
     - ''
 
-Outputs: 
+Outputs:
   DBName: 
     Description: "Amazon Aurora database name"
     Value: !Ref DBName
@@ -163,7 +162,7 @@ Parameters:
       - 10.5
       - 10.6
       - 10.7
-  DBInstanceClass: 
+  DBInstanceClass:
     AllowedValues:
       - db.r5.large
       - db.r5.xlarge
@@ -423,7 +422,7 @@ Resources:
     Type: AWS::RDS::DBParameterGroup
     Properties:
       Description: !Join [ "- ", [ "Aurora PG Database Instance Parameter Group for Cloudformation Stack ", !Ref DBName ] ]
-      Family: !FindInMap [DBFamilyMap, !Ref DBEngineVersion, "family"] 
+      Family: !FindInMap [DBFamilyMap, !Ref DBEngineVersion, "family"]
       Parameters:
         log_rotation_age: '1440'
         log_rotation_size: '102400'
@@ -431,12 +430,12 @@ Resources:
     Type: AWS::RDS::DBClusterParameterGroup
     Properties:
       Description: !Join [ "- ", [ "Aurora PG Cluster Parameter Group for  Cloudformation Stack ", !Ref DBName ] ]
-      Family: !FindInMap [DBFamilyMap, !Ref DBEngineVersion, "family"] 
+      Family: !FindInMap [DBFamilyMap, !Ref DBEngineVersion, "family"]
       Parameters:
         rds.force_ssl: 0
-  AuroraDBCluster: 
+  AuroraDBCluster:
     Type: "AWS::RDS::DBCluster"
-    Properties: 
+    Properties:
       BackupRetentionPeriod: !Ref DBBackupRetentionPeriod
       DBClusterParameterGroupName: !Ref RDSDBClusterParameterGroup
       DBSubnetGroupName: !Ref AuroraDBSubnetGroup
