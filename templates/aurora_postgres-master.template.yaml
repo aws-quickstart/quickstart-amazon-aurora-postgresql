@@ -103,6 +103,7 @@ Metadata:
         default: Key Name
       RemoteAccessCIDR:
         default: Permitted IP range
+
 Parameters:
   AvailabilityZones:
    Description: >-
@@ -189,7 +190,7 @@ Parameters:
   DBEngineVersion:
     Description: Select Database Engine Version
     Type: String
-    Default: 9.6.9
+    Default: 9.6.12
     AllowedValues:
       - 9.6.9
       - 9.6.11
@@ -197,8 +198,14 @@ Parameters:
       - 10.5
       - 10.6
       - 10.7
-  DBInstanceClass: 
-    AllowedValues: 
+  DBInstanceClass:
+    AllowedValues:
+      - db.r5.large
+      - db.r5.xlarge
+      - db.r5.2xlarge
+      - db.r5.4xlarge
+      - db.r5.12xlarge
+      - db.r5.24xlarge
       - db.r4.large
       - db.r4.xlarge
       - db.r4.2xlarge
@@ -206,7 +213,7 @@ Parameters:
       - db.r4.8xlarge
       - db.r4.16xlarge
     ConstraintDescription: "Must select a valid database instance type."
-    Default: db.r4.large
+    Default: db.r5.large
     Description: "The name of the compute and memory capacity class of the database instance."
     Type: String
   DBMasterUserPassword: 
@@ -295,6 +302,7 @@ Parameters:
       - fips
       - other
       - ''
+
 Conditions:
   GovCloudCondition: !Equals 
     - !Ref 'AWS::Region'
@@ -302,6 +310,7 @@ Conditions:
   EnableBastionAccess: !Equals
     - !Ref EnableBastion
     - "true"
+
 Resources:
   VPCStack:
     Type: 'AWS::CloudFormation::Stack'
