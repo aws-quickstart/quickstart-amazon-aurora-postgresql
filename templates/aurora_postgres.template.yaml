@@ -80,11 +80,12 @@ Metadata:
        default: Confidentiality classifier
       ProjectCostCenter:
        default: Project cost center
-Mappings: 
-  DBFamilyMap: 
-    "9.6.9": 
+
+Mappings:
+  DBFamilyMap:
+    "9.6.9":
       "family": "aurora-postgresql9.6"
-    "9.6.11": 
+    "9.6.11":
       "family": "aurora-postgresql9.6"
     "9.6.12":
       "family": "aurora-postgresql9.6"
@@ -112,7 +113,8 @@ Conditions:
     !Equals
     - !Ref CustomDBSecurityGroup
     - ''
-Outputs: 
+
+Outputs:
   DBName: 
     Description: "Amazon Aurora database name"
     Value: !Ref DBName
@@ -129,7 +131,8 @@ Outputs:
     Condition: UseDatabaseEncryption
     Description: The alias of the encryption key created for RDS
     Value: !Ref EncryptionKeyAlias
-Parameters: 
+
+Parameters:
   DBAllocatedStorageEncrypted:
     Default: true
     AllowedValues:
@@ -151,7 +154,7 @@ Parameters:
   DBEngineVersion:
     Description: Select Database Engine Version
     Type: String
-    Default: 9.6.9
+    Default: 9.6.12
     AllowedValues:
       - 9.6.9
       - 9.6.11
@@ -159,8 +162,14 @@ Parameters:
       - 10.5
       - 10.6
       - 10.7
-  DBInstanceClass: 
-    AllowedValues: 
+  DBInstanceClass:
+    AllowedValues:
+      - db.r5.large
+      - db.r5.xlarge
+      - db.r5.2xlarge
+      - db.r5.4xlarge
+      - db.r5.12xlarge
+      - db.r5.24xlarge
       - db.r4.large
       - db.r4.xlarge
       - db.r4.2xlarge
@@ -168,7 +177,7 @@ Parameters:
       - db.r4.8xlarge
       - db.r4.16xlarge
     ConstraintDescription: "Must select a valid database instance type."
-    Default: db.r4.large
+    Default: db.r5.large
     Description: "The name of the compute and memory capacity class of the database instance."
     Type: String
   DBAccessCIDR:
@@ -276,6 +285,7 @@ Parameters:
       - fips
       - other
       - ''
+
 Resources:
   DBSNSTopic:
     Type: AWS::SNS::Topic
@@ -412,7 +422,7 @@ Resources:
     Type: AWS::RDS::DBParameterGroup
     Properties:
       Description: !Join [ "- ", [ "Aurora PG Database Instance Parameter Group for Cloudformation Stack ", !Ref DBName ] ]
-      Family: !FindInMap [DBFamilyMap, !Ref DBEngineVersion, "family"] 
+      Family: !FindInMap [DBFamilyMap, !Ref DBEngineVersion, "family"]
       Parameters:
         log_rotation_age: '1440'
         log_rotation_size: '102400'
@@ -420,12 +430,12 @@ Resources:
     Type: AWS::RDS::DBClusterParameterGroup
     Properties:
       Description: !Join [ "- ", [ "Aurora PG Cluster Parameter Group for  Cloudformation Stack ", !Ref DBName ] ]
-      Family: !FindInMap [DBFamilyMap, !Ref DBEngineVersion, "family"] 
+      Family: !FindInMap [DBFamilyMap, !Ref DBEngineVersion, "family"]
       Parameters:
         rds.force_ssl: 0
-  AuroraDBCluster: 
+  AuroraDBCluster:
     Type: "AWS::RDS::DBCluster"
-    Properties: 
+    Properties:
       BackupRetentionPeriod: !Ref DBBackupRetentionPeriod
       DBClusterParameterGroupName: !Ref RDSDBClusterParameterGroup
       DBSubnetGroupName: !Ref AuroraDBSubnetGroup
