@@ -17,13 +17,6 @@ global:
     - us-west-2
   reporting: true
 tests:
-  #  postgres-v9:
-  #    parameter_input: aurora_postgres-master-v9-6-9.json
-  #    template_file: aurora_postgres-master.template.yaml
-  #  regions:
-  #    - ca-central-1
-  #    - eu-west-2
-  #    - ap-southeast-1
   postgres-v10-5:
     parameter_input: aurora_postgres-master-v10-5.json
     template_file: aurora_postgres-master.template.yaml
@@ -40,18 +33,3 @@ tests:
     - us-east-1
     - us-east-2
     - us-west-1
-    - us-west-2
-      #  postgres-v10-5:
-      #    parameter_input: aurora_postgres-master-v10-5.json
-      #    template_file: aurora_postgres-master.template.yaml
-      #    regions:
-      #    - ap-northeast-1
-      #    - ap-northeast-2
-      #    - ap-south-1
-      #    - ap-southeast-2
-      #    - eu-central-1
-      #    - eu-west-1
-      #    - us-east-1
-      #    - us-east-2
-      #    - us-west-1
-      #    - us-west-2
