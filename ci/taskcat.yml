@@ -18,7 +18,7 @@ global:
   reporting: true
 tests:
   postgres-v10-5:
-    parameter_input: aurora_postgres-master-v10-5.json
+    parameter_input: aurora_postgres-master-v9-6-9.json
     template_file: aurora_postgres-master.template.yaml
     regions:
     - ap-northeast-1
