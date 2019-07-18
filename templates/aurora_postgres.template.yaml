@@ -113,13 +113,12 @@ Conditions:
     !Equals
     - !Ref CustomDBSecurityGroup
     - ''
-
 Outputs:
   DBName: 
     Description: "Amazon Aurora database name"
     Value: !Ref DBName
   DBMasterUsername:
-    Description: "Amazon Aurora database username"
+    Description: "Amazon Aurora database master username"
     Value: !Ref DBMasterUsername
   RDSEndPointAddress: 
     Description: "Amazon Aurora endpoint"
@@ -134,7 +133,6 @@ Outputs:
     Condition: UseDatabaseEncryption
     Description: The alias of the encryption key created for RDS
     Value: !Ref EncryptionKeyAlias
-
 Parameters:
   DBAllocatedStorageEncrypted:
     Default: true
