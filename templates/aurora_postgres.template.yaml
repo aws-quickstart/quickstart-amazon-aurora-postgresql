@@ -118,6 +118,9 @@ Outputs:
   DBName: 
     Description: "Amazon Aurora database name"
     Value: !Ref DBName
+  DBMasterUsername:
+    Description: "Amazon Aurora database username"
+    Value: !Ref DBMasterUsername
   RDSEndPointAddress: 
     Description: "Amazon Aurora endpoint"
     Value: !Sub ${AuroraDBCluster.Endpoint.Address}
