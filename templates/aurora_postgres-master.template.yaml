@@ -18,6 +18,7 @@ Metadata:
       Parameters:
        - EnableBastion
        - RemoteAccessCIDR
+       - EnableTCPForwarding
     - Label:
         default: Database configuration
       Parameters:
@@ -71,6 +72,8 @@ Metadata:
         default: Multi-AZ deployment
       EnableBastion:
         default: Create bastion stack
+      EnableTCPForwarding:
+        default: Enable TCP Forwarding
       PrivateSubnet1CIDR:
         default: Private subnet 1 CIDR
       PrivateSubnet2CIDR:
@@ -177,6 +180,13 @@ Parameters:
       - false
     Description: Whether or not to encrypt the database.
     Type: String
+  EnableTCPForwarding:
+    Type: String
+    Description: Enable/Disable TCP Forwarding
+    Default: 'false'
+    AllowedValues:
+      - 'true'
+      - 'false'
   DBAutoMinorVersionUpgrade: 
     AllowedValues: 
       - "true"
@@ -386,6 +396,7 @@ Resources:
         PublicSubnet2ID: !GetAtt 
           - VPCStack
           - Outputs.PublicSubnet2ID
+        EnableTCPForwarding: !Ref EnableTCPForwarding
         RemoteAccessCIDR: !Ref RemoteAccessCIDR
         VPCID: !GetAtt 
           - VPCStack
