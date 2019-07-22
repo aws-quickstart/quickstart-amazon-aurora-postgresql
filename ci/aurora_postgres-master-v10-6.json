@@ -25,7 +25,7 @@
     },
     {
         "ParameterKey": "DBEngineVersion",
-        "ParameterValue": "10.5"
+        "ParameterValue": "10.6"
     },
     {
         "ParameterKey": "DBMasterUserPassword",
