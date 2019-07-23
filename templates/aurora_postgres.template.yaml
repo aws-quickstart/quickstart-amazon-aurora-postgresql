@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "AWS Aurora Postgres, Do Not Remove Apache License Version 2.0 (qs-1pj6s43e3) Jul,22,2019"
+Description: "AWS Aurora Postgres, Do Not Remove Apache License Version 2.0 (qs-1pj6s43e3) July,23,2019"
 Metadata:
   LICENSE: Apache License Version 2.0
   AWS::CloudFormation::Interface:
@@ -25,6 +25,7 @@ Metadata:
       - DBAccessCIDR
       - DBMultiAZ
       - DBAllocatedStorageEncrypted
+      - EnableEventSubscription
       - NotificationList
     - Label:
         default: Database tags (optional)
@@ -66,6 +67,8 @@ Metadata:
         default: VPC ID
       CustomDBSecurityGroup:
         default: Custom securiy group ID
+      EnableEventSubscription:
+        default: Enable Event Subscription
       NotificationList:
         default: SNS notification email
       EnvironmentStage:
@@ -99,6 +102,10 @@ Conditions:
   IsDBMultiAZ:
     !Equals
     - !Ref DBMultiAZ
+    - 'true'
+  EventSubscription:
+    !Equals
+    - !Ref EnableEventSubscription
     - 'true'
   DoCreateDatabase:
     !Not
@@ -238,6 +245,13 @@ Parameters:
     Description: "ID of the VPC you are deploying Aurora into (e.g., vpc-0343606e)."
     Type: 'AWS::EC2::VPC::Id'
     Default: ''
+  EnableEventSubscription: 
+    AllowedValues: 
+      - "true"
+      - "false"
+    Default: "true"
+    Description: "Enables event subscription to Notification List"
+    Type: String
   NotificationList:
     Type: String
     Default: 'db-ops@domain.com'
@@ -703,6 +717,7 @@ Resources:
       EvaluationPeriods: 5
       TreatMissingData: 'notBreaching'
   DatabaseClusterEventSubscription:
+    Condition: EventSubscription
     Type: 'AWS::RDS::EventSubscription'
     Properties:
       EventCategories:
@@ -713,6 +728,7 @@ Resources:
       SourceIds: [!Ref AuroraDBCluster]
       SourceType: 'db-cluster'
   DatabaseInstanceEventSubscription:
+    Condition: EventSubscription
     Type: 'AWS::RDS::EventSubscription'
     Properties:
       EventCategories:
