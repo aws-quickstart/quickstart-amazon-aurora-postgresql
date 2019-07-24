@@ -16,7 +16,7 @@ global:
   - eu-west-2
   - eu-central-1
   - us-west-1
-  - sa-east-1
+    #  - sa-east-1
   - eu-west-3
   reporting: true
 tests:
