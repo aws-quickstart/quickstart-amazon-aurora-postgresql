@@ -19,6 +19,9 @@
         "ParameterKey": "DBMultiAZ",
         "ParameterValue": "false"
     },
+    {   "ParameterKey": "EnableEventSubscription",
+        "ParameterValue": "false"
+    },
     {
         "ParameterKey": "EnableBastion",
         "ParameterValue": "false"

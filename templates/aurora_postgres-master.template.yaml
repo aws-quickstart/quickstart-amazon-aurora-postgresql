@@ -1,4 +1,4 @@
-Description: "AWS VPC + Aurora Postgres, Do Not Remove Apache License Version 2.0 (qs-1pj6s43hc) Jul,22,2019"
+Description: "AWS VPC + Aurora Postgres, Do Not Remove Apache License Version 2.0 (qs-1pj6s43hc) July,23,2019"
 Metadata:
   LICENSE: Apache License Version 2.0
   AWS::CloudFormation::Interface:
@@ -32,6 +32,7 @@ Metadata:
       - DBPort
       - DBAllocatedStorageEncrypted
       - DBMultiAZ
+      - EnableEventSubscription
       - NotificationList
     - Label:
         default: Database tags (optional)
@@ -88,6 +89,8 @@ Metadata:
         default: Quick Start S3 key prefix
       VPCCIDR:
         default: VPC CIDR
+      EnableEventSubscription:
+        default: Enable Event Subscription
       NotificationList:
         default: SNS notification email
       EnvironmentStage:
@@ -264,6 +267,13 @@ Parameters:
     MaxLength: "64"
     MinLength: "5"
     Type: String
+  EnableEventSubscription: 
+    AllowedValues: 
+      - "true"
+      - "false"
+    Default: "true"
+    Description: "Enables event subscription to Notification List"
+    Type: String
   NotificationList:
     Type: String
     Default: 'db-ops@domain.com'
@@ -313,7 +323,6 @@ Parameters:
       - fips
       - other
       - ''
-
 Conditions:
   GovCloudCondition: !Equals 
     - !Ref 'AWS::Region'
@@ -321,7 +330,6 @@ Conditions:
   EnableBastionAccess: !Equals
     - !Ref EnableBastion
     - "true"
-
 Resources:
   VPCStack:
     Type: 'AWS::CloudFormation::Stack'
@@ -374,6 +382,7 @@ Resources:
         DBPort: !Ref DBPort
         DBMultiAZ: !Ref DBMultiAZ
         DBAccessCIDR: !Ref VPCCIDR
+        EnableEventSubscription: !Ref EnableEventSubscription
         NotificationList: !Ref NotificationList
         EnvironmentStage: !Ref EnvironmentStage
         Application: !Ref Application
