@@ -303,6 +303,7 @@ Parameters:
 
 Resources:
   DBSNSTopic:
+    Condition: EventSubscription
     Type: AWS::SNS::Topic
     Properties:
       Subscription:
