@@ -32,6 +32,6 @@
     },
     {
         "ParameterKey": "DBMasterUserPassword",
-        "ParameterValue": "$[taskcat_genpass_8A]"
+        "ParameterValue": "$[taskcat_genpass_8S]"
     }
 ]
