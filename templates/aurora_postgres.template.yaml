@@ -115,7 +115,7 @@ Conditions:
   UseDatabaseEncryption:
     !Equals
     - !Ref DBAllocatedStorageEncrypted
-    - true
+    - "true"
   CreateSecurityGroup:
     !Equals
     - !Ref CustomDBSecurityGroup
@@ -142,10 +142,10 @@ Outputs:
     Value: !Ref EncryptionKeyAlias
 Parameters:
   DBAllocatedStorageEncrypted:
-    Default: true
+    Default: "true"
     AllowedValues:
-      - true
-      - false
+      - "true"
+      - "false"
     Description: Whether or not to encrypt the database.
     Type: String
   DBAutoMinorVersionUpgrade: 

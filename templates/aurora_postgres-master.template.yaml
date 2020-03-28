@@ -184,10 +184,10 @@ Parameters:
     Description: "If true, a bastion stack will be created."
     Type: String
   DBAllocatedStorageEncrypted:
-    Default: true
+    Default: "true"
     AllowedValues:
-      - true
-      - false
+      - "true"
+      - "false"
     Description: Whether or not to encrypt the database.
     Type: String
   EnableTCPForwarding:
