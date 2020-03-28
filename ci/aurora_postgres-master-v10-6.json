@@ -33,5 +33,9 @@
     {
         "ParameterKey": "DBMasterUserPassword",
         "ParameterValue": "$[taskcat_genpass_8S]"
+    },
+    {
+        "ParameterKey": "QSS3BucketRegion",
+        "ParameterValue": "$[taskcat_current_region]"
     }
 ]
