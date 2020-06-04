@@ -102,6 +102,8 @@ Mappings:
       "family": "aurora-postgresql11"
     "11.6":
       "family": "aurora-postgresql11"
+    "11.7":
+      "family": "aurora-postgresql11"
 Conditions:
   IsDBMultiAZ:
     !Equals
@@ -176,6 +178,7 @@ Parameters:
       - 10.7
       - 11.4
       - 11.6
+      - 11.7
   DBInstanceClass:
     AllowedValues:
       - db.r5.large
