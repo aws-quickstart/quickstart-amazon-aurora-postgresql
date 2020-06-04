@@ -212,6 +212,8 @@ Parameters:
       - 10.5
       - 10.6
       - 10.7
+      - 11.4
+      - 11.6
   DBInstanceClass:
     AllowedValues:
       - db.r5.large
