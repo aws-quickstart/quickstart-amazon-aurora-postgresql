@@ -126,6 +126,9 @@ Conditions:
     !Equals
     - !Ref CustomDBSecurityGroup
     - ''
+  GovCloudCondition: !Equals
+    - !Ref 'AWS::Region'
+    - us-gov-west-1
 Outputs:
   DBName: 
     Description: "Amazon Aurora database name"
@@ -330,8 +333,9 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS:
-                - !Sub "arn:aws:iam::${AWS::AccountId}:root"
+              AWS: !Sub
+                - arn:${ArnPartition}:iam::${AWS::AccountId}:root
+                - ArnPartition: !If ["GovCloudCondition", "aws-us-gov", "aws"]
             Action: 'kms:*'
             Resource: '*'
       Tags:
