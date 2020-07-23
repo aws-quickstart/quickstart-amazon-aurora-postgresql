@@ -9,3 +9,7 @@ ignore_checks:
   - E3012
   # E1001: Top level template section tests is not valid
   - E1001
+  # W3011: Both UpdateReplacePolicy and DeletionPolicy are needed to protect Resources/EncryptionKey from deletion
+  - W3011
+  # E3029: You cannot specify CopyTagsToSnapshot for Aurora AWS::RDS::DBInstance at Resources/AuroraDB3/Properties/CopyTagsToSnapshot
+  - E3029
