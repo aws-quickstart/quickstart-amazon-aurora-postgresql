@@ -21,7 +21,7 @@ tests:
     parameters:
       AvailabilityZones: $[taskcat_genaz_2]
       DBEngineVersion: "11.6"
-      DBMasterUserPassword: $[taskcat_genpass_18S]
+      DBMasterUserPassword: "Ae6ii5fcckj4ddi0t!"
       EnableEventSubscription: "false"
       EnableBastion: "false"
       KeyPairName: tonynv
