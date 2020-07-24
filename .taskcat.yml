@@ -20,7 +20,7 @@ tests:
   aurora-postgresql:
     parameters:
       AvailabilityZones: $[taskcat_genaz_2]
-      DBEngineVersion: "10.6"
+      DBEngineVersion: "11.6"
       DBMasterUserPassword: $[taskcat_genpass_18S]
       EnableEventSubscription: "false"
       EnableBastion: "false"
