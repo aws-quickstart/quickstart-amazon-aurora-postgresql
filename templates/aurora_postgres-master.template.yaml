@@ -334,9 +334,6 @@ Parameters:
       - other
       - ''
 Conditions:
-  GovCloudCondition: !Equals 
-    - !Ref 'AWS::Region'
-    - us-gov-west-1
   EnableBastionAccess: !Equals
     - !Ref EnableBastion
     - "true"
