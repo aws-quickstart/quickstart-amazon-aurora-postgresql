@@ -236,6 +236,8 @@ Parameters:
       - db.r4.4xlarge
       - db.r4.8xlarge
       - db.r4.16xlarge
+      - db.t3.medium
+      - db.t3.large
     ConstraintDescription: "Must select a valid database instance type."
     Default: db.r5.large
     Description: "The name of the compute and memory capacity class of the database instance."
