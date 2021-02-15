@@ -86,24 +86,32 @@ Metadata:
 
 Mappings:
   DBFamilyMap:
-    "9.6.9":
+    "9.6.16":
       "family": "aurora-postgresql9.6"
-    "9.6.11":
+    "9.6.17":
       "family": "aurora-postgresql9.6"
-    "9.6.12":
+    "9.6.18":
       "family": "aurora-postgresql9.6"
-    "10.5":
+    "9.6.19":
+      "family": "aurora-postgresql9.6"
+    "10.11":
       "family": "aurora-postgresql10"
-    "10.6":
+    "10.12":
       "family": "aurora-postgresql10"
-    "10.7":
+    "10.13":
       "family": "aurora-postgresql10"
-    "11.4":
-      "family": "aurora-postgresql11"
+    "10.14":
+      "family": "aurora-postgresql10"
     "11.6":
       "family": "aurora-postgresql11"
     "11.7":
       "family": "aurora-postgresql11"
+    "11.8":
+      "family": "aurora-postgresql11"
+    "11.9":
+      "family": "aurora-postgresql11"
+    "12.4":
+      "family": "aurora-postgresql12"
 Conditions:
   IsDBMultiAZ:
     !Equals
@@ -168,17 +176,21 @@ Parameters:
   DBEngineVersion:
     Description: Select Database Engine Version
     Type: String
-    Default: 9.6.12
+    Default: 10.14
     AllowedValues:
-      - 9.6.9
-      - 9.6.11
-      - 9.6.12
-      - 10.5
-      - 10.6
-      - 10.7
-      - 11.4
+      - 9.6.16
+      - 9.6.17
+      - 9.6.18
+      - 9.6.19
+      - 10.11
+      - 10.12
+      - 10.13
+      - 10.14
       - 11.6
       - 11.7
+      - 11.8
+      - 11.9
+      - 12.4
   DBInstanceClass:
     AllowedValues:
       - db.r5.large
