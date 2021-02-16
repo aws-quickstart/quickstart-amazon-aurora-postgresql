@@ -104,6 +104,8 @@ Mappings:
       "family": "aurora-postgresql11"
     "11.7":
       "family": "aurora-postgresql11"
+    "12.4":
+      "family": "aurora-postgresql12"
 Conditions:
   IsDBMultiAZ:
     !Equals
@@ -179,6 +181,7 @@ Parameters:
       - 11.4
       - 11.6
       - 11.7
+      - 12.4
   DBInstanceClass:
     AllowedValues:
       - db.r5.large
@@ -354,7 +357,6 @@ Resources:
       EngineVersion: !Ref DBEngineVersion
       DBParameterGroupName: !Ref DBParamGroup
       PubliclyAccessible: false
-      CopyTagsToSnapshot: true
       Tags:
         -
           Key: Name
@@ -388,7 +390,6 @@ Resources:
       EngineVersion: !Ref DBEngineVersion
       DBParameterGroupName: !Ref DBParamGroup
       PubliclyAccessible: false
-      CopyTagsToSnapshot: true
       Tags:
         -
           Key: Name
@@ -422,7 +423,6 @@ Resources:
       Engine: aurora-postgresql
       DBParameterGroupName: !Ref DBParamGroup
       PubliclyAccessible: false
-      CopyTagsToSnapshot: true
       Tags:
         -
           Key: Name
