@@ -355,7 +355,6 @@ Resources:
       EngineVersion: !Ref DBEngineVersion
       DBParameterGroupName: !Ref DBParamGroup
       PubliclyAccessible: false
-      CopyTagsToSnapshot: true
       Tags:
         -
           Key: Name
@@ -389,7 +388,6 @@ Resources:
       EngineVersion: !Ref DBEngineVersion
       DBParameterGroupName: !Ref DBParamGroup
       PubliclyAccessible: false
-      CopyTagsToSnapshot: true
       Tags:
         -
           Key: Name
@@ -423,7 +421,6 @@ Resources:
       Engine: aurora-postgresql
       DBParameterGroupName: !Ref DBParamGroup
       PubliclyAccessible: false
-      CopyTagsToSnapshot: true
       Tags:
         -
           Key: Name
