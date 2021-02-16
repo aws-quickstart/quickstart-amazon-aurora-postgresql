@@ -92,17 +92,23 @@ Mappings:
       "family": "aurora-postgresql9.6"
     "9.6.12":
       "family": "aurora-postgresql9.6"
+    "9.6.19":
+      "family": "aurora-postgresql9.6"
     "10.5":
       "family": "aurora-postgresql10"
     "10.6":
       "family": "aurora-postgresql10"
     "10.7":
       "family": "aurora-postgresql10"
+    "10.14":
+      "family": "aurora-postgresql10"
     "11.4":
       "family": "aurora-postgresql11"
     "11.6":
       "family": "aurora-postgresql11"
     "11.7":
+      "family": "aurora-postgresql11"
+    "11.9":
       "family": "aurora-postgresql11"
     "12.4":
       "family": "aurora-postgresql12"
