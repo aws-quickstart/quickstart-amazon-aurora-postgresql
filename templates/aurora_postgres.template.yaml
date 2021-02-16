@@ -104,6 +104,8 @@ Mappings:
       "family": "aurora-postgresql11"
     "11.7":
       "family": "aurora-postgresql11"
+    "12.4":
+      "family": "aurora-postgresql12"
 Conditions:
   IsDBMultiAZ:
     !Equals
