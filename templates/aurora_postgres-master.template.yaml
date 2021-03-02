@@ -31,6 +31,7 @@ Metadata:
       - DBMasterUserPassword
       - DBPort
       - DBAllocatedStorageEncrypted
+      - DBExportLogToCloudwatch
       - DBMultiAZ
       - EnableEventSubscription
       - NotificationList
@@ -58,6 +59,8 @@ Metadata:
         default: Database name
       DBAllocatedStorageEncrypted:
         default: Database encryption enabled
+      DBExportLogToCloudwatch:
+        default: Export Database Log to Cloudwatch
       DBAutoMinorVersionUpgrade:
         default: Database auto minor version upgrade
       DBBackupRetentionPeriod:
@@ -190,6 +193,13 @@ Parameters:
       - "false"
     Description: Whether or not to encrypt the database.
     Type: String
+  DBExportLogToCloudwatch:
+    Default: "true"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: Whether or not to export Database logs to Cloudwatch
+    Type: String
   EnableTCPForwarding:
     Type: String
     Description: Enable/Disable TCP Forwarding
@@ -211,31 +221,31 @@ Parameters:
   DBEngineVersion:
     Description: Select Database Engine Version
     Type: String
-    Default: 10.6
+    Default: 11.9
     AllowedValues:
-      - 9.6.9
-      - 9.6.11
-      - 9.6.12
-      - 10.5
-      - 10.6
-      - 10.7
-      - 11.4
+      - 9.6.16
+      - 9.6.17
+      - 9.6.18
+      - 9.6.19
+      - 10.11
+      - 10.12
+      - 10.13
+      - 10.14
       - 11.6
       - 11.7
+      - 11.8
+      - 11.9
+      - 12.4
   DBInstanceClass:
     AllowedValues:
       - db.r5.large
       - db.r5.xlarge
       - db.r5.2xlarge
       - db.r5.4xlarge
+      - db.r5.8xlarge
       - db.r5.12xlarge
+      - db.r5.16xlarge
       - db.r5.24xlarge
-      - db.r4.large
-      - db.r4.xlarge
-      - db.r4.2xlarge
-      - db.r4.4xlarge
-      - db.r4.8xlarge
-      - db.r4.16xlarge
       - db.t3.medium
       - db.t3.large
     ConstraintDescription: "Must select a valid database instance type."
@@ -390,6 +400,7 @@ Resources:
         DBName: !Ref DBName
         DBAutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
         DBAllocatedStorageEncrypted: !Ref DBAllocatedStorageEncrypted
+        DBExportLogToCloudwatch: !Ref DBExportLogToCloudwatch
         DBBackupRetentionPeriod: !Ref DBBackupRetentionPeriod
         DBEngineVersion: !Ref DBEngineVersion
         DBInstanceClass: !Ref DBInstanceClass

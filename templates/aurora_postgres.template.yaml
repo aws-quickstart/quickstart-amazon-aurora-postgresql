@@ -25,6 +25,7 @@ Metadata:
       - DBAccessCIDR
       - DBMultiAZ
       - DBAllocatedStorageEncrypted
+      - DBExportLogToCloudwatch
       - EnableEventSubscription
       - NotificationList
     - Label:
@@ -43,6 +44,8 @@ Metadata:
         default: Database Engine Version
       DBAllocatedStorageEncrypted:
         default: Database encryption enabled
+      DBExportLogToCloudwatch:
+        default: Export Database Log to Cloudwatch
       DBAutoMinorVersionUpgrade:
         default: Database auto minor version upgrade
       DBBackupRetentionPeriod:
@@ -66,7 +69,7 @@ Metadata:
       VPCID:
         default: VPC ID
       CustomDBSecurityGroup:
-        default: Custom securiy group ID
+        default: Custom security group ID
       EnableEventSubscription:
         default: Enable Event Subscription
       NotificationList:
@@ -86,27 +89,27 @@ Metadata:
 
 Mappings:
   DBFamilyMap:
-    "9.6.9":
+    "9.6.16":
       "family": "aurora-postgresql9.6"
-    "9.6.11":
+    "9.6.17":
       "family": "aurora-postgresql9.6"
-    "9.6.12":
+    "9.6.18":
       "family": "aurora-postgresql9.6"
     "9.6.19":
       "family": "aurora-postgresql9.6"
-    "10.5":
+    "10.11":
       "family": "aurora-postgresql10"
-    "10.6":
+    "10.12":
       "family": "aurora-postgresql10"
-    "10.7":
+    "10.13":
       "family": "aurora-postgresql10"
     "10.14":
       "family": "aurora-postgresql10"
-    "11.4":
-      "family": "aurora-postgresql11"
     "11.6":
       "family": "aurora-postgresql11"
     "11.7":
+      "family": "aurora-postgresql11"
+    "11.8":
       "family": "aurora-postgresql11"
     "11.9":
       "family": "aurora-postgresql11"
@@ -129,6 +132,10 @@ Conditions:
   UseDatabaseEncryption:
     !Equals
     - !Ref DBAllocatedStorageEncrypted
+    - "true"
+  EnableDBLogExport:
+    !Equals
+    - !Ref DBExportLogToCloudwatch
     - "true"
   CreateSecurityGroup:
     !Equals
@@ -162,6 +169,13 @@ Parameters:
       - "false"
     Description: Whether or not to encrypt the database.
     Type: String
+  DBExportLogToCloudwatch:
+    Default: "true"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: Whether or not to export Database logs to Cloudwatch
+    Type: String    
   DBAutoMinorVersionUpgrade: 
     AllowedValues: 
       - "true"
@@ -176,19 +190,19 @@ Parameters:
   DBEngineVersion:
     Description: Select Database Engine Version
     Type: String
-    Default: 9.6.12
+    Default: 11.9
     AllowedValues:
-      - 9.6.9
-      - 9.6.11
-      - 9.6.12
+      - 9.6.16
+      - 9.6.17
+      - 9.6.18
       - 9.6.19
-      - 10.5
-      - 10.6
-      - 10.7
+      - 10.11
+      - 10.12
+      - 10.13
       - 10.14
-      - 11.4
       - 11.6
       - 11.7
+      - 11.8
       - 11.9
       - 12.4
   DBInstanceClass:
@@ -197,14 +211,10 @@ Parameters:
       - db.r5.xlarge
       - db.r5.2xlarge
       - db.r5.4xlarge
+      - db.r5.8xlarge
       - db.r5.12xlarge
+      - db.r5.16xlarge
       - db.r5.24xlarge
-      - db.r4.large
-      - db.r4.xlarge
-      - db.r4.2xlarge
-      - db.r4.4xlarge
-      - db.r4.8xlarge
-      - db.r4.16xlarge
       - db.t3.medium
       - db.t3.large
     ConstraintDescription: "Must select a valid database instance type."
@@ -428,8 +438,8 @@ Resources:
       AutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
       DBClusterIdentifier: !Ref AuroraDBCluster
       DBInstanceClass: !Ref DBInstanceClass
-      EngineVersion: !Ref DBEngineVersion
       Engine: aurora-postgresql
+      EngineVersion: !Ref DBEngineVersion
       DBParameterGroupName: !Ref DBParamGroup
       PubliclyAccessible: false
       Tags:
@@ -476,6 +486,8 @@ Resources:
       BackupRetentionPeriod: !Ref DBBackupRetentionPeriod
       DBClusterParameterGroupName: !Ref RDSDBClusterParameterGroup
       DBSubnetGroupName: !Ref AuroraDBSubnetGroup
+      EnableCloudwatchLogsExports: 
+        - !If [EnableDBLogExport, postgresql, !Ref 'AWS::NoValue']
       DatabaseName:
         !If
         - DoCreateDatabase
@@ -768,3 +780,14 @@ Resources:
       - !If [IsDBMultiAZ, !Ref AuroraDB2, !Ref "AWS::NoValue"]
       - !If [IsDBMultiAZ, !Ref AuroraDB3, !Ref "AWS::NoValue"]
       SourceType: 'db-instance'
+  DBParameterGroupEventSubscription:
+    Condition: EventSubscription
+    Type: 'AWS::RDS::EventSubscription'
+    Properties:
+      EventCategories:
+      - "configuration change"
+      SnsTopicArn: !Ref DBSNSTopic
+      SourceIds:
+      - !Ref DBParamGroup
+      SourceType: 'db-parameter-group'
+  
