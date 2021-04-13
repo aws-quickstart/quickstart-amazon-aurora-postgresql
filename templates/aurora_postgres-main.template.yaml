@@ -237,17 +237,7 @@ Parameters:
       - 11.9
       - 12.4
   DBInstanceClass:
-    AllowedValues:
-      - db.r5.large
-      - db.r5.xlarge
-      - db.r5.2xlarge
-      - db.r5.4xlarge
-      - db.r5.8xlarge
-      - db.r5.12xlarge
-      - db.r5.16xlarge
-      - db.r5.24xlarge
-      - db.t3.medium
-      - db.t3.large
+    AllowedPattern: "db\\.[a-z0-9]*\\.[a-z0-9]*"
     ConstraintDescription: "Must select a valid database instance type."
     Default: db.r5.large
     Description: "The name of the compute and memory capacity class of the database instance."
