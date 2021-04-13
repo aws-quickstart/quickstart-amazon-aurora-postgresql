@@ -149,13 +149,16 @@ Outputs:
     Description: "Amazon Aurora database master username"
     Value: !Ref DBMasterUsername
   RDSEndPointAddress: 
-    Description: "Amazon Aurora endpoint"
+    Description: "Amazon Aurora write endpoint"
     Value: !Sub ${AuroraDBCluster.Endpoint.Address}
+  RDSReadEndPointAddress: 
+    Description: "Amazon Aurora read endpoint"
+    Value: !Sub ${AuroraDBCluster.ReadEndpoint.Address}
   RDSEndPointPort: 
     Description: "Amazon Aurora port"
     Value: !Sub ${AuroraDBCluster.Endpoint.Port}
   RDSEndPoints: 
-    Description: "Full Amazon Aurora endpoint"
+    Description: "Full Amazon Aurora write endpoint"
     Value: !Sub ${AuroraDBCluster.Endpoint.Address}:${AuroraDBCluster.Endpoint.Port}/${DBName}
   RDSEncryptionKey:
     Condition: UseDatabaseEncryption
