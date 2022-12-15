@@ -16,16 +16,31 @@ project:
   - eu-central-1
   - us-west-1
   - eu-west-3
+  parameters:
+    AvailabilityZones: $[taskcat_genaz_2]
+    DBMasterUserPassword: "Ae6ii5fcckj4ddi0t!"
+    EnableEventSubscription: "false"
+    EnableBastion: "false"
+    KeyPairName: $[taskcat_getkeypair]
+    QSS3BucketName: $[taskcat_autobucket]
+    QSS3BucketRegion: $[taskcat_current_region]
+    RemoteAccessCIDR: 10.0.0.0/16
 tests:
-  aurora-postgresql:
+  aurora-postgresql-14:
     parameters:
-      AvailabilityZones: $[taskcat_genaz_2]
-      DBEngineVersion: "11.6"
-      DBMasterUserPassword: "Ae6ii5fcckj4ddi0t!"
-      EnableEventSubscription: "false"
-      EnableBastion: "false"
-      KeyPairName: tonynv
-      QSS3BucketName: $[taskcat_autobucket]
-      QSS3BucketRegion: $[taskcat_current_region]
-      RemoteAccessCIDR: 10.0.0.0/16
+      DBEngineVersion: "14.5"
     template: ./templates/aurora_postgres-main.template.yaml
+    regions:
+      - us-west-2
+  aurora-postgresql-13:
+    parameters:
+      DBEngineVersion: "13.8"
+    template: ./templates/aurora_postgres-main.template.yaml
+    regions:
+      - ca-central-1
+  aurora-postgresql-12:
+    parameters:
+      DBEngineVersion: "12.12"
+    template: ./templates/aurora_postgres-main.template.yaml
+    regions:
+      - eu-west-2
