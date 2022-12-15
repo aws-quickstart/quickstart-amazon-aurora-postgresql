@@ -89,32 +89,15 @@ Metadata:
 
 Mappings:
   DBFamilyMap:
-    "9.6.16":
-      "family": "aurora-postgresql9.6"
-    "9.6.17":
-      "family": "aurora-postgresql9.6"
-    "9.6.18":
-      "family": "aurora-postgresql9.6"
-    "9.6.19":
-      "family": "aurora-postgresql9.6"
-    "10.11":
-      "family": "aurora-postgresql10"
-    "10.12":
-      "family": "aurora-postgresql10"
-    "10.13":
-      "family": "aurora-postgresql10"
-    "10.14":
-      "family": "aurora-postgresql10"
-    "11.6":
+    "11.17":
       "family": "aurora-postgresql11"
-    "11.7":
-      "family": "aurora-postgresql11"
-    "11.8":
-      "family": "aurora-postgresql11"
-    "11.9":
-      "family": "aurora-postgresql11"
-    "12.4":
+    "12.12":
       "family": "aurora-postgresql12"
+    "13.8":
+      "family": "aurora-postgresql13"
+    "14.5":
+      "family": "aurora-postgresql14"
+
 Conditions:
   IsDBMultiAZ:
     !Equals
@@ -142,22 +125,22 @@ Conditions:
     - !Ref CustomDBSecurityGroup
     - ''
 Outputs:
-  DBName: 
+  DBName:
     Description: "Amazon Aurora database name"
     Value: !Ref DBName
   DBMasterUsername:
     Description: "Amazon Aurora database master username"
     Value: !Ref DBMasterUsername
-  RDSEndPointAddress: 
+  RDSEndPointAddress:
     Description: "Amazon Aurora write endpoint"
     Value: !Sub ${AuroraDBCluster.Endpoint.Address}
-  RDSReadEndPointAddress: 
+  RDSReadEndPointAddress:
     Description: "Amazon Aurora read endpoint"
     Value: !Sub ${AuroraDBCluster.ReadEndpoint.Address}
-  RDSEndPointPort: 
+  RDSEndPointPort:
     Description: "Amazon Aurora port"
     Value: !Sub ${AuroraDBCluster.Endpoint.Port}
-  RDSEndPoints: 
+  RDSEndPoints:
     Description: "Full Amazon Aurora write endpoint"
     Value: !Sub ${AuroraDBCluster.Endpoint.Address}:${AuroraDBCluster.Endpoint.Port}/${DBName}
   RDSEncryptionKey:
@@ -178,36 +161,27 @@ Parameters:
       - "true"
       - "false"
     Description: Whether or not to export Database logs to Cloudwatch
-    Type: String    
-  DBAutoMinorVersionUpgrade: 
-    AllowedValues: 
+    Type: String
+  DBAutoMinorVersionUpgrade:
+    AllowedValues:
       - "true"
       - "false"
     Default: "false"
     Description: "Select true to set up auto minor version upgrade."
     Type: String
-  DBBackupRetentionPeriod: 
+  DBBackupRetentionPeriod:
     Default: "35"
     Description: "The number of days for which automatic database snapshots are retained."
     Type: String
   DBEngineVersion:
     Description: Select Database Engine Version
     Type: String
-    Default: 11.9
+    Default: 14.5
     AllowedValues:
-      - 9.6.16
-      - 9.6.17
-      - 9.6.18
-      - 9.6.19
-      - 10.11
-      - 10.12
-      - 10.13
-      - 10.14
-      - 11.6
-      - 11.7
-      - 11.8
-      - 11.9
-      - 12.4
+      - 11.17
+      - 12.12
+      - 13.8
+      - 14.5
   DBInstanceClass:
     AllowedPattern: "db\\.[a-z0-9]*\\.[a-z0-9]*"
     ConstraintDescription: "Must select a valid database instance type."
@@ -230,7 +204,7 @@ Parameters:
     MinLength: "8"
     NoEcho: "True"
     Type: String
-  DBMasterUsername: 
+  DBMasterUsername:
     AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
     ConstraintDescription: "Must begin with a letter and contain only alphanumeric characters."
     Default: pgadmin
@@ -245,14 +219,14 @@ Parameters:
     ConstraintDescription: 'Must be in the range [1115-65535].'
     MinValue: 1150
     MaxValue: 65535
-  DBMultiAZ: 
-    AllowedValues: 
+  DBMultiAZ:
+    AllowedValues:
       - "true"
       - "false"
     Default: "true"
     Description: "Specifies if the database instance is a multiple Availability Zone deployment."
     Type: String
-  DBName: 
+  DBName:
     AllowedPattern: "[a-zA-Z0-9]*"
     Description: "Name of the Amazon Aurora database."
     MaxLength: "64"
@@ -269,12 +243,12 @@ Parameters:
   Subnet2ID:
     Description: The ID of the private subnet in Availability Zone 2.
     Type: 'AWS::EC2::Subnet::Id'
-  VPCID: 
+  VPCID:
     Description: "ID of the VPC you are deploying Aurora into (e.g., vpc-0343606e)."
     Type: 'AWS::EC2::VPC::Id'
     Default: ''
-  EnableEventSubscription: 
-    AllowedValues: 
+  EnableEventSubscription:
+    AllowedValues:
       - "true"
       - "false"
     Default: "true"
@@ -479,7 +453,7 @@ Resources:
       BackupRetentionPeriod: !Ref DBBackupRetentionPeriod
       DBClusterParameterGroupName: !Ref RDSDBClusterParameterGroup
       DBSubnetGroupName: !Ref AuroraDBSubnetGroup
-      EnableCloudwatchLogsExports: 
+      EnableCloudwatchLogsExports:
         - !If [EnableDBLogExport, postgresql, !Ref 'AWS::NoValue']
       DatabaseName:
         !If
@@ -493,8 +467,8 @@ Resources:
       MasterUsername: !Ref DBMasterUsername
       Port: !Ref DBPort
       StorageEncrypted: !If [UseDatabaseEncryption, !Ref DBAllocatedStorageEncrypted, !Ref 'AWS::NoValue']
-      Tags: 
-        - 
+      Tags:
+        -
           Key: Name
           Value: !Sub AuroraDB-${AWS::StackName}
         -
@@ -515,32 +489,32 @@ Resources:
         -
           Key: Compliance
           Value: !Ref Compliance
-      VpcSecurityGroupIds: 
+      VpcSecurityGroupIds:
         !If
           - CreateSecurityGroup
           - [!Ref RDSSecurityGroup]
           - [!Ref CustomDBSecurityGroup]
     UpdateReplacePolicy: Snapshot
-  AuroraDBSubnetGroup: 
-    Properties: 
+  AuroraDBSubnetGroup:
+    Properties:
       DBSubnetGroupDescription: "Subnets available for the Amazon Aurora database instance"
-      SubnetIds: 
+      SubnetIds:
        - !Ref Subnet1ID
        - !Ref Subnet2ID
     Type: "AWS::RDS::DBSubnetGroup"
   RDSSecurityGroup:
     Condition: CreateSecurityGroup
-    Properties: 
-      GroupDescription: "Allow access to database port" 
-      SecurityGroupEgress: 
-        - 
+    Properties:
+      GroupDescription: "Allow access to database port"
+      SecurityGroupEgress:
+        -
           CidrIp: 0.0.0.0/0
           FromPort: -1
           IpProtocol: '-1'
           ToPort: -1
-      SecurityGroupIngress: 
-        - 
-          CidrIp: !Ref DBAccessCIDR 
+      SecurityGroupIngress:
+        -
+          CidrIp: !Ref DBAccessCIDR
           FromPort: !Ref DBPort
           IpProtocol: tcp
           ToPort: !Ref DBPort
@@ -783,4 +757,4 @@ Resources:
       SourceIds:
       - !Ref DBParamGroup
       SourceType: 'db-parameter-group'
-  
+

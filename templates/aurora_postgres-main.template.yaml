@@ -179,8 +179,8 @@ Parameters:
     Default: quickstart-amazon-aurora-postgresql/
     Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
     Type: String
-  EnableBastion: 
-    AllowedValues: 
+  EnableBastion:
+    AllowedValues:
       - "true"
       - "false"
     Default: "true"
@@ -207,42 +207,33 @@ Parameters:
     AllowedValues:
       - 'true'
       - 'false'
-  DBAutoMinorVersionUpgrade: 
-    AllowedValues: 
+  DBAutoMinorVersionUpgrade:
+    AllowedValues:
       - "true"
       - "false"
     Default: "false"
     Description: "Select true to set up auto minor version upgrade."
     Type: String
-  DBBackupRetentionPeriod: 
+  DBBackupRetentionPeriod:
     Default: "35"
     Description: "The number of days for which automatic database snapshots are retained."
     Type: String
   DBEngineVersion:
     Description: Select Database Engine Version
     Type: String
-    Default: 11.9
+    Default: 14.5
     AllowedValues:
-      - 9.6.16
-      - 9.6.17
-      - 9.6.18
-      - 9.6.19
-      - 10.11
-      - 10.12
-      - 10.13
-      - 10.14
-      - 11.6
-      - 11.7
-      - 11.8
-      - 11.9
-      - 12.4
+      - 11.17
+      - 12.12
+      - 13.8
+      - 14.5
   DBInstanceClass:
     AllowedPattern: "db\\.[a-z0-9]*\\.[a-z0-9]*"
     ConstraintDescription: "Must select a valid database instance type."
     Default: db.r5.large
     Description: "The name of the compute and memory capacity class of the database instance."
     Type: String
-  DBMasterUserPassword: 
+  DBMasterUserPassword:
     AllowedPattern: "(?=^.{6,255}$)((?=.*\\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\\d)(?=.*[^A-Za-z0-9])(?=.*[a-z])|(?=.*[^A-Za-z0-9])(?=.*[A-Z])(?=.*[a-z])|(?=.*\\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9]))^.*"
     ConstraintDescription: "Min 8 chars."
     Description: "The database admin account password."
@@ -250,7 +241,7 @@ Parameters:
     MinLength: "8"
     NoEcho: "True"
     Type: String
-  DBMasterUsername: 
+  DBMasterUsername:
     AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
     ConstraintDescription: "Must begin with a letter and contain only alphanumeric characters."
     Default: pgadmin
@@ -265,22 +256,22 @@ Parameters:
     ConstraintDescription: 'Must be in the range [1115-65535].'
     MinValue: 1150
     MaxValue: 65535
-  DBMultiAZ: 
-    AllowedValues: 
+  DBMultiAZ:
+    AllowedValues:
       - "true"
       - "false"
     Default: "true"
     Description: "Specifies if the database instance is a multiple Availability Zone deployment."
     Type: String
-  DBName: 
+  DBName:
     AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
     Default: 'AuroraPostgresDB'
     Description: "Name of the Amazon Aurora database."
     MaxLength: "64"
     MinLength: "5"
     Type: String
-  EnableEventSubscription: 
-    AllowedValues: 
+  EnableEventSubscription:
+    AllowedValues:
       - "true"
       - "false"
     Default: "true"
@@ -356,7 +347,7 @@ Resources:
               - !Sub '${QSS3BucketName}-${AWS::Region}'
               - !Ref QSS3BucketName
       Parameters:
-        AvailabilityZones: !Join 
+        AvailabilityZones: !Join
           - ','
           - !Ref AvailabilityZones
         NumberOfAZs: '2'
@@ -417,15 +408,15 @@ Resources:
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         KeyPairName: !Ref KeyPairName
-        PublicSubnet1ID: !GetAtt 
+        PublicSubnet1ID: !GetAtt
           - VPCStack
           - Outputs.PublicSubnet1ID
-        PublicSubnet2ID: !GetAtt 
+        PublicSubnet2ID: !GetAtt
           - VPCStack
           - Outputs.PublicSubnet2ID
         EnableTCPForwarding: !Ref EnableTCPForwarding
         RemoteAccessCIDR: !Ref RemoteAccessCIDR
-        VPCID: !GetAtt 
+        VPCID: !GetAtt
           - VPCStack
           - Outputs.VPCID
         QSS3BucketName: !Ref QSS3BucketName
