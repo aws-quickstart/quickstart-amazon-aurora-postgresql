@@ -1,6 +1,10 @@
 Description: "AWS VPC + Aurora Postgres, Do Not Remove Apache License Version 2.0 (qs-1pj6s43hc) July,23,2019"
 Metadata:
   LICENSE: Apache License Version 2.0
+  cfn-lint:
+    config:
+      ignore_checks:
+        - E9101
   AWS::CloudFormation::Interface:
     ParameterGroups:
     - Label:

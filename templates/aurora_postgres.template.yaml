@@ -2,6 +2,11 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: "AWS Aurora Postgres, Do Not Remove Apache License Version 2.0 (qs-1pj6s43e3) July,23,2019"
 Metadata:
   LICENSE: Apache License Version 2.0
+  cfn-lint:
+    config:
+      ignore_checks:
+        - E9101
+        - W3011
   AWS::CloudFormation::Interface:
     ParameterGroups:
     - Label:
@@ -311,10 +316,18 @@ Resources:
       - Endpoint: !Ref NotificationList
         Protocol: email
   EncryptionKey:
+    Metadata:
+      cfn-lint:
+        config:
+          ignore_checks:
+            - EIAMPolicyActionWildcard
+          ignore_reasons:
+            - EIAMPolicyActionWildcard: "All KMS actions allowed by design"
     Condition: UseDatabaseEncryption
     DeletionPolicy: Retain
     Type: AWS::KMS::Key
     Properties:
+      EnableKeyRotation: true
       KeyPolicy:
         Version: 2012-10-17
         Id: !Ref AWS::StackName
@@ -448,6 +461,13 @@ Resources:
       Parameters:
         rds.force_ssl: 0
   AuroraDBCluster:
+    Metadata:
+      cfn-lint:
+        config:
+          ignore_checks:
+            - ERDSStorageEncryptionEnabled
+          ignore_reasons:
+            - ERDSStorageEncryptionEnabled: "StorageEncryption is conditional"
     Type: "AWS::RDS::DBCluster"
     Properties:
       BackupRetentionPeriod: !Ref DBBackupRetentionPeriod
