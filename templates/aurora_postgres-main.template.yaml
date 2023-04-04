@@ -559,12 +559,11 @@ Resources:
   APGNS:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://refarch-pg-rds-aurora.s3.amazonaws.com/aurora_postgres.template.yaml
-      # TemplateURL:
-      #   !Sub
-      #     - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/aurora_postgres.template.yaml'
-      #     - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-      #       S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      TemplateURL:
+        !Sub
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/aurora_postgres.template.yaml'
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         #Database Network configuration
         VPCID:
