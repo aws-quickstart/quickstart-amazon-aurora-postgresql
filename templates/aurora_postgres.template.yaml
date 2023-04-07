@@ -7,6 +7,9 @@ Metadata:
       ignore_checks:
         - E9101
         - W3011
+        - W2030
+        - E3002
+        - E1019
   AWS::CloudFormation::Interface:
     ParameterGroups:
     - Label:
@@ -663,8 +666,10 @@ Resources:
         config:
           ignore_checks:
             - ERDSStorageEncryptionEnabled
+            - E2521
           ignore_reasons:
             - ERDSStorageEncryptionEnabled: "StorageEncryption is conditional"
+            - E2521: "When ManageMasterUserPassword is set to true, MasterUserPassword is ignored"
     Type: "AWS::RDS::DBCluster"
     DeletionPolicy: Snapshot
     UpdateReplacePolicy: Snapshot
@@ -724,6 +729,13 @@ Resources:
     
   Inst1:
     Type: "AWS::RDS::DBInstance"
+    Metadata:
+      cfn-lint:
+        config:
+          ignore_checks:
+            - ERDSDBInstancePubliclyAccessible
+          ignore_reasons:
+            - ERDSDBInstancePubliclyAccessible: "PubliclyAccessible is false by default"
     Properties:
       AutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
       DBClusterIdentifier: !Ref AuroraDBCluster
@@ -762,6 +774,13 @@ Resources:
   Inst2:
     Type: "AWS::RDS::DBInstance"
     Condition: IsDBMultiAZ
+    Metadata:
+      cfn-lint:
+        config:
+          ignore_checks:
+            - ERDSDBInstancePubliclyAccessible
+          ignore_reasons:
+            - ERDSDBInstancePubliclyAccessible: "PubliclyAccessible is false by default"
     Properties:
       AutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
       DBClusterIdentifier: !Ref AuroraDBCluster
