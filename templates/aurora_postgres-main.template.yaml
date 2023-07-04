@@ -5,70 +5,78 @@ Metadata:
     config:
       ignore_checks:
         - E9101
+
+###############################################################################
+# Parameter groups
+###############################################################################
   AWS::CloudFormation::Interface:
     ParameterGroups:
     - Label:
         default: Network configuration
       Parameters:
-      - AvailabilityZones
-      - VPCCIDR
-      - PrivateSubnet1CIDR
-      - PrivateSubnet2CIDR
-      - PublicSubnet1CIDR
-      - PublicSubnet2CIDR
+        - AvailabilityZones
+        - VPCCIDR
+        - PrivateSubnet1CIDR
+        - PrivateSubnet2CIDR
+        - PublicSubnet1CIDR
+        - PublicSubnet2CIDR
     - Label:
         default: Linux Bastion Host configuration
       Parameters:
-       - EnableBastion
-       - KeyPairName
-       - RemoteAccessCIDR
-       - EnableTCPForwarding
+        - EnableBastion
+        - KeyPairName
+        - RemoteAccessCIDR
+        - EnableTCPForwarding
     - Label:
         default: Database General configuration
       Parameters:
-      - DBEngineVersion
-      - DBInstanceClass
-      - MinACUs
-      - MaxACUs
-      - DBPort
-      - DBName
-      - DBMasterUsername
-      - ManageMasterUserPassword
-      - DBMasterUserPassword
-      - DBMultiAZ
-      - DBAutoMinorVersionUpgrade
-      - DBBackupRetentionPeriod
-      - EnableIAMDBAuth
+        - DBEngineVersion
+        - DBInstanceClass
+        - MinACUs
+        - MaxACUs
+        - DBPort
+        - DBName
+        - DBMasterUsername
+        - ManageMasterUserPassword
+        - DBMasterUserPassword
+        - DBMultiAZ
+        - DBAutoMinorVersionUpgrade
+        - DBBackupRetentionPeriod
+        - EnableIAMDBAuth
     - Label:
         default: Database Storage configuration
       Parameters:  
-      - DBAllocatedStorageEncrypted
-      - StorageType
+        - DBAllocatedStorageEncrypted
+        - StorageType
     - Label:
         default: Database Monitoring configuration
       Parameters:  
-      - DBExportLogToCloudwatch
-      - EnablePerformanceInsights
-      - PerformanceInsightsRetentionPeriod
-      - EnableEnhancedMonitoring
-      - MonitoringInterval
-      - EnableEventSubscription
-      - NotificationList
+        - DBExportLogToCloudwatch
+        - EnablePerformanceInsights
+        - PerformanceInsightsRetentionPeriod
+        - EnableEnhancedMonitoring
+        - MonitoringInterval
+        - EnableEventSubscription
+        - NotificationList
     - Label:
         default: Database tags (optional)
       Parameters:
-      - EnvironmentStage
-      - Application
-      - ApplicationVersion
-      - ProjectCostCenter
-      - Confidentiality
-      - Compliance
+        - EnvironmentStage
+        - Application
+        - ApplicationVersion
+        - ProjectCostCenter
+        - Confidentiality
+        - Compliance
     - Label:
         default: Quick Start configuration
       Parameters:
-      - QSS3BucketName
-      - QSS3BucketRegion
-      - QSS3KeyPrefix
+        - QSS3BucketName
+        - QSS3BucketRegion
+        - QSS3KeyPrefix
+
+###############################################################################
+# Parameter labels
+###############################################################################
     ParameterLabels:
 
       #VPC stack related parameter labels
@@ -160,8 +168,12 @@ Metadata:
         default: Project cost center
       StorageType:
         default: Aurora Storage Type
-      
+
+###############################################################################
+# Parameters
+###############################################################################      
 Parameters:
+
   #VPC stack related parameters
   AvailabilityZones:
    Description: >-
@@ -521,12 +533,18 @@ Parameters:
       - aurora-iopt1
     Default: aurora
 
+###############################################################################
+# Conditions
+############################################################################### 
 Conditions:
   EnableBastionAccess: !Equals
     - !Ref EnableBastion
     - "true"
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 
+###############################################################################
+# Resources
+###############################################################################
 Resources:
   
   VPCStack:

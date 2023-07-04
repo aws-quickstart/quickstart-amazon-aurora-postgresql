@@ -10,57 +10,65 @@ Metadata:
         - W2030
         - E3002
         - E1019
+
+###############################################################################
+# Parameter groups
+###############################################################################
   AWS::CloudFormation::Interface:
     ParameterGroups:
     - Label:
         default: Database Network configuration
       Parameters:
-      - VPCID
-      - Subnet1ID
-      - Subnet2ID
-      - CustomDBSecurityGroup
-      - DBAccessCIDR
-      - PubliclyAccessible
+        - VPCID
+        - Subnet1ID
+        - Subnet2ID
+        - CustomDBSecurityGroup
+        - DBAccessCIDR
+        - PubliclyAccessible
     - Label:
         default: Database General configuration
       Parameters:
-      - DBEngineVersion
-      - DBInstanceClass
-      - MinACUs
-      - MaxACUs
-      - DBPort
-      - DBName
-      - DBMasterUsername
-      - ManageMasterUserPassword
-      - DBMasterUserPassword
-      - DBMultiAZ
-      - DBAutoMinorVersionUpgrade
-      - DBBackupRetentionPeriod
-      - EnableIAMDBAuth
+        - DBEngineVersion
+        - DBInstanceClass
+        - MinACUs
+        - MaxACUs
+        - DBPort
+        - DBName
+        - DBMasterUsername
+        - ManageMasterUserPassword
+        - DBMasterUserPassword
+        - DBMultiAZ
+        - DBAutoMinorVersionUpgrade
+        - DBBackupRetentionPeriod
+        - EnableIAMDBAuth
     - Label:
         default: Database Storage configuration
       Parameters:  
-      - DBAllocatedStorageEncrypted
-      - StorageType
+        - DBAllocatedStorageEncrypted
+        - StorageType
     - Label:
         default: Database Monitoring configuration
       Parameters:  
-      - DBExportLogToCloudwatch
-      - EnablePerformanceInsights
-      - PerformanceInsightsRetentionPeriod
-      - EnableEnhancedMonitoring
-      - MonitoringInterval
-      - EnableEventSubscription
-      - NotificationList
+        - DBExportLogToCloudwatch
+        - EnablePerformanceInsights
+        - PerformanceInsightsRetentionPeriod
+        - EnableEnhancedMonitoring
+        - MonitoringInterval
+        - EnableEventSubscription
+        - NotificationList
     - Label:
         default: Database tags (optional)
       Parameters:
-      - EnvironmentStage
-      - Application
-      - ApplicationVersion
-      - ProjectCostCenter
-      - Confidentiality
-      - Compliance
+        - EnvironmentStage
+        - Application
+        - ApplicationVersion
+        - ProjectCostCenter
+        - Confidentiality
+        - Compliance
+  
+###############################################################################
+# Parameter labels
+###############################################################################
     ParameterLabels:
       Application:
         default: Application name
@@ -131,6 +139,9 @@ Metadata:
       VPCID:
         default: VPC ID
 
+###############################################################################
+# Mappings
+###############################################################################
 Mappings:
   DBFamilyMap:
     '11.13':
@@ -188,6 +199,9 @@ Mappings:
     '15.2':
       family: aurora-postgresql15
 
+###############################################################################
+# Conditions
+###############################################################################
 Conditions:
   CreateSecurityGroup:
     !Equals
@@ -232,6 +246,9 @@ Conditions:
     - !Ref ManageMasterUserPassword
     - "true"
 
+###############################################################################
+# Rules
+###############################################################################
 Rules:
   SubnetsInVPC:
     Assertions:
@@ -244,6 +261,9 @@ Rules:
       - Assert: !Not [!Equals [!Ref Subnet1ID, !Ref Subnet2ID]]
         AssertDescription: "Please provide 2 distinct private subnets"
 
+###############################################################################
+# Outputs
+###############################################################################
 Outputs:
   DBName:
     Condition: DoCreateDatabase
@@ -273,6 +293,9 @@ Outputs:
     Description: The alias of the encryption key created for RDS
     Value: !Ref EncryptionKeyAlias
 
+###############################################################################
+# Parameters
+###############################################################################
 Parameters:
   Application:
     Type: String
@@ -557,12 +580,6 @@ Parameters:
     Default: "false"
     Description: "Indicates whether the DB instance is an internet-facing instance"
     Type: String
-  Subnet1ID:
-    Description: The ID of the private subnet in Availability Zone 1.
-    Type: 'AWS::EC2::Subnet::Id'
-  Subnet2ID:
-    Description: The ID of the private subnet in Availability Zone 2.
-    Type: 'AWS::EC2::Subnet::Id'
   StorageType:
     Type: String
     Description: >-
@@ -572,11 +589,20 @@ Parameters:
       - aurora
       - aurora-iopt1
     Default: aurora
+  Subnet1ID:
+    Description: The ID of the private subnet in Availability Zone 1.
+    Type: 'AWS::EC2::Subnet::Id'
+  Subnet2ID:
+    Description: The ID of the private subnet in Availability Zone 2.
+    Type: 'AWS::EC2::Subnet::Id'
   VPCID:
     Description: "ID of the VPC you are deploying Aurora into (e.g., vpc-0343606e)."
     Type: 'AWS::EC2::VPC::Id'
     Default: ''
 
+###############################################################################
+# Resources
+###############################################################################
 Resources:
   
   AuroraDBSubnetGroup:
