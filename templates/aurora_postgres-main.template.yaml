@@ -43,6 +43,7 @@ Metadata:
         default: Database Storage configuration
       Parameters:  
       - DBAllocatedStorageEncrypted
+      - StorageType
     - Label:
         default: Database Monitoring configuration
       Parameters:  
@@ -157,6 +158,8 @@ Metadata:
         default:  Number of days to retain Performance Insights data
       ProjectCostCenter:
         default: Project cost center
+      StorageType:
+        default: Aurora Storage Type
       
 Parameters:
   #VPC stack related parameters
@@ -292,10 +295,10 @@ Parameters:
     MaxValue: 35
   DBEngineVersion:
     Description: >- 
-      Select Database Engine Version. Aurora Serverless v2 with Aurora PostgreSQL is supported for versions 13.6 & higher and version 14.3 & higher.
+      Select Database Engine Version. Aurora Serverless v2 with Aurora PostgreSQL is supported for versions 13.6 & higher, version 14.3 & higher, and 15.2 & higher.
       For supported engines and Region availability for Aurora Serverless v2 with Aurora PostgreSQL, refer https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.Aurora_Fea_Regions_DB-eng.Feature.ServerlessV2.html
     Type: String
-    Default: 14.6
+    Default: 14.7
     AllowedValues:
       - 11.13
       - 11.14
@@ -303,22 +306,27 @@ Parameters:
       - 11.16
       - 11.17
       - 11.18
+      - 11.19
       - 12.8
       - 12.9
       - 12.10
       - 12.11
       - 12.12
       - 12.13
+      - 12.14
       - 13.4
       - 13.5
       - 13.6
       - 13.7
       - 13.8
       - 13.9
+      - 13.10
       - 14.3
       - 14.4
       - 14.5
-      - 14.6  
+      - 14.6
+      - 14.7
+      - 15.2
   DBExportLogToCloudwatch:
     Default: "true"
     AllowedValues:
@@ -327,7 +335,7 @@ Parameters:
     Description: Whether or not to export Database logs to CloudWatch
     Type: String
   DBInstanceClass:
-    Default: db.r5.large
+    Default: db.r6g.2xlarge
     Description: >-
       The database instance type. 
       Please see supported instance types for the Aurora PostgreSQL version selected https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.DBInstanceClass.html.
@@ -357,6 +365,13 @@ Parameters:
       - db.r6i.8xlarge
       - db.r6i.large
       - db.r6i.xlarge
+      - db.r7g.12xlarge
+      - db.r7g.16xlarge
+      - db.r7g.2xlarge
+      - db.r7g.4xlarge
+      - db.r7g.8xlarge
+      - db.r7g.large
+      - db.r7g.xlarge
       - db.serverless
       - db.t3.large
       - db.t3.medium
@@ -368,7 +383,7 @@ Parameters:
       - db.x2g.4xlarge
       - db.x2g.8xlarge
       - db.x2g.large
-      - db.x2g.xlarge     
+      - db.x2g.xlarge
   DBMasterUsername:
     AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
     ConstraintDescription: "Must begin with a letter and contain only alphanumeric characters."
@@ -496,6 +511,15 @@ Parameters:
     Type: String
     Default: ''
     Description: Designates the cost center associated with the project of the given AWS resource. (Optional)
+  StorageType:
+    Type: String
+    Description: >-
+      Designates the storage type to associate with the Aurora DB cluster. Choose aurora-iopt1 for Aurora I/O Optimized storage.
+      For details refer https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.StorageReliability.html#aurora-storage-type
+    AllowedValues:
+      - aurora
+      - aurora-iopt1
+    Default: aurora
 
 Conditions:
   EnableBastionAccess: !Equals
@@ -595,6 +619,7 @@ Resources:
         EnableIAMDBAuth: !Ref EnableIAMDBAuth
         #Database Storage configuration
         DBAllocatedStorageEncrypted: !Ref DBAllocatedStorageEncrypted
+        StorageType: !Ref StorageType
         #Database Monitoring configuration
         DBExportLogToCloudwatch: !Ref DBExportLogToCloudwatch
         EnablePerformanceInsights: !Ref EnablePerformanceInsights

@@ -41,6 +41,7 @@ Metadata:
         default: Database Storage configuration
       Parameters:  
       - DBAllocatedStorageEncrypted
+      - StorageType
     - Label:
         default: Database Monitoring configuration
       Parameters:  
@@ -125,6 +126,8 @@ Metadata:
         default: Private subnet 1 ID
       Subnet2ID:
         default: Private subnet 2 ID
+      StorageType:
+        default: Aurora Storage Type
       VPCID:
         default: VPC ID
 
@@ -142,6 +145,8 @@ Mappings:
       family: aurora-postgresql11
     '11.18':
       family: aurora-postgresql11
+    '11.19':
+      family: aurora-postgresql11
     '12.8':
       family: aurora-postgresql12
     '12.9':
@@ -153,6 +158,8 @@ Mappings:
     '12.12':
       family: aurora-postgresql12
     '12.13':
+      family: aurora-postgresql12
+    '12.14':
       family: aurora-postgresql12
     '13.4':
       family: aurora-postgresql13
@@ -166,6 +173,8 @@ Mappings:
       family: aurora-postgresql13
     '13.9':
       family: aurora-postgresql13
+    '13.10':
+      family: aurora-postgresql13
     '14.3':
       family: aurora-postgresql14
     '14.4':
@@ -174,6 +183,10 @@ Mappings:
       family: aurora-postgresql14
     '14.6':
       family: aurora-postgresql14
+    '14.7':
+      family: aurora-postgresql14
+    '15.2':
+      family: aurora-postgresql15
 
 Conditions:
   CreateSecurityGroup:
@@ -321,10 +334,10 @@ Parameters:
     MaxValue: 35
   DBEngineVersion:
     Description: >- 
-      Select Database Engine Version. Aurora Serverless v2 with Aurora PostgreSQL is supported for versions 13.6 & higher and version 14.3 & higher.
+      Select Database Engine Version. Aurora Serverless v2 with Aurora PostgreSQL is supported for versions 13.6 & higher, version 14.3 & higher, and 15.2 & higher.
       For supported engines and Region availability for Aurora Serverless v2 with Aurora PostgreSQL, refer https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.Aurora_Fea_Regions_DB-eng.Feature.ServerlessV2.html
     Type: String
-    Default: 14.6
+    Default: 14.7
     AllowedValues:
       - 11.13
       - 11.14
@@ -332,22 +345,27 @@ Parameters:
       - 11.16
       - 11.17
       - 11.18
+      - 11.19
       - 12.8
       - 12.9
       - 12.10
       - 12.11
       - 12.12
       - 12.13
+      - 12.14
       - 13.4
       - 13.5
       - 13.6
       - 13.7
       - 13.8
       - 13.9
+      - 13.10
       - 14.3
       - 14.4
       - 14.5
-      - 14.6  
+      - 14.6
+      - 14.7
+      - 15.2  
   DBExportLogToCloudwatch:
     Default: "true"
     AllowedValues:
@@ -356,7 +374,7 @@ Parameters:
     Description: Whether or not to export Database logs to CloudWatch
     Type: String
   DBInstanceClass:
-    Default: db.r5.large
+    Default: db.r6g.2xlarge
     Description: >-
       The database instance type. 
       Please see supported instance types for the Aurora PostgreSQL version selected https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.DBInstanceClass.html.
@@ -386,6 +404,13 @@ Parameters:
       - db.r6i.8xlarge
       - db.r6i.large
       - db.r6i.xlarge
+      - db.r7g.12xlarge
+      - db.r7g.16xlarge
+      - db.r7g.2xlarge
+      - db.r7g.4xlarge
+      - db.r7g.8xlarge
+      - db.r7g.large
+      - db.r7g.xlarge
       - db.serverless
       - db.t3.large
       - db.t3.medium
@@ -538,6 +563,15 @@ Parameters:
   Subnet2ID:
     Description: The ID of the private subnet in Availability Zone 2.
     Type: 'AWS::EC2::Subnet::Id'
+  StorageType:
+    Type: String
+    Description: >-
+      Designates the storage type to associate with the Aurora DB cluster. Choose aurora-iopt1 for Aurora I/O Optimized storage.
+      For details refer https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.StorageReliability.html#aurora-storage-type
+    AllowedValues:
+      - aurora
+      - aurora-iopt1
+    Default: aurora
   VPCID:
     Description: "ID of the VPC you are deploying Aurora into (e.g., vpc-0343606e)."
     Type: 'AWS::EC2::VPC::Id'
@@ -699,6 +733,7 @@ Resources:
         MinCapacity: !If [IsASV2, !Ref MinACUs, !Ref 'AWS::NoValue']
         MaxCapacity: !If [IsASV2, !Ref MaxACUs, !Ref 'AWS::NoValue']
       StorageEncrypted: !If [UseDatabaseEncryption, !Ref DBAllocatedStorageEncrypted, !Ref 'AWS::NoValue']
+      StorageType: !Ref StorageType
       Tags:
         -
           Key: Name
