@@ -357,7 +357,9 @@ Parameters:
     MaxValue: 35
   DBEngineVersion:
     Description: >- 
-      Select Database Engine Version. Aurora Serverless v2 with Aurora PostgreSQL is supported for versions 13.6 & higher, version 14.3 & higher, and 15.2 & higher.
+      Select Database Engine Version. 
+      Aurora Serverless v2 with Aurora PostgreSQL is available in v13.6 & higher, v14.3 & higher, and v15.2 & higher.
+      Aurora I/O-Optimized configuration is available in Aurora PostgreSQL v13.10 and higher, v14.7 and higher, and v15.2 and higher.
       For supported engines and Region availability for Aurora Serverless v2 with Aurora PostgreSQL, refer https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.Aurora_Fea_Regions_DB-eng.Feature.ServerlessV2.html
     Type: String
     Default: 14.7
