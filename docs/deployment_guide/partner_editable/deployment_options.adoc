@@ -1,0 +1,8 @@
+// Edit this placeholder text as necessary to describe the deployment options.
+
+This Partner Solution provides the following deployment options:
+
+* https://fwd.aws/ArPJP?[Deploy {partner-product-short-name} into a new VPC^]. This option builds a new AWS environment consisting of the VPC, subnets, NAT gateways, security groups, and an optional Linux bastion host, and then deploys Aurora into this new VPC.
+* https://fwd.aws/GBkBd?[Deploy {partner-product-short-name} into an existing VPC^]. This option provisions Aurora in your existing AWS infrastructure. Use this option to plug Aurora PostgreSQL into your existing AWS CloudFormation templates as a drop-in PostgreSQL database replacement.
+
+This Partner Solution provides separate templates for these options. It also lets you configure Classless Inter-Domain Routing (CIDR) blocks, instance types, and {partner-product-short-name} settings.
