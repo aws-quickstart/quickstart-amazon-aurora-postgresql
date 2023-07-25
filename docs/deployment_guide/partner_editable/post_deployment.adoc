@@ -1,0 +1,78 @@
+== Postdeployment steps
+
+Use the URLs displayed on the Resources tab for the stack to view the resources that were created.
+
+[#postdeployment10]
+.Aurora resources after successful deployment
+image::../docs/deployment_guide/images/image2.png[Postdeployment]
+
+=== Test the deployment
+
+*Note* This optional test procedure assumes that you have the *bastion host* access with *TCPForwarding* capabilities.
+
+. Download the latest version of https://www.pgadmin.org/download/[pgAdmin 4] and install it on your workstation from where you will be connecting to the Aurora PostgreSQL DB cluster.
+. From the AWS CloudFormation console, on the *Outputs* tab for BastionStack, note the value for EIP1, as shown in Figure 3.
+
+[#postdeployment2]
+.IP address for Linux bastion host, on the Outputs tab
+image::../docs/deployment_guide/images/image3.png[image,width=648,height=270]
+
+. From the AWS CloudFormation console, on the *Outputs* tab for AuroraStack__,__ note the values of DBName, DBMasterUsername, RDSEndpointAddress**,** and RDSEndpointPort, as shown in Figure 4.
+
+[#postdeployment3]
+.Aurora stack outputs
+image::../docs/deployment_guide/images/image4.png[image,width=648,height=250]
+
+. Create an SSH tunnel to the bastion host using the following command.
+
+ssh -N -L <RDSEndpointPort>:<RDSEndPointAddress>:<RDSEndpointPort> ec2-user@EIP1 -i <KeyPairName>
+
+*Note* You will need to enter the path for the EC2 key pair that you specified for *Key name* (KeyPairName) parameter while creating the CloudFormation stack. When you’re finished testing, terminate the SSH tunnel by pressing Ctrl+C.
+
+With the values added, the command will look like the following.
+
+ssh -N -L 5432:amazonaurorapostgres-aurorastack-auroradbcluster-13ikqqfuz14ut.cluster-cqkx5uin33n9.us-west-2.rds.amazonaws.com:5432 ec2-user@35.166.99.4 -i keypair.pem
+
+. Launch *PgAdmin 4* on your workstation, enter a new password, and choose *OK* to continue.
+
+[#postdeployment4]
+.Set Master Password for PgAdmin 4
+image::../docs/deployment_guide/images/image5.png[image,width=599,height=201]
+
+image::../docs/deployment_guide/images/image5.png[image,width=599,height=201]
+
+In *PgAmin 4*, create a new server connection by choosing *Servers*, choosing the context (right-click) menu, choosing *Create*, and choosing *Server*.
+
+[#postdeployment5]
+.Create a new server connection in PgAdmin 4
+image::../docs/deployment_guide/images/image6.png[image,width=648,height=148]
+
+. To connect to your database, choose the *General* tab, and provide a descriptive name.
+
+[#postdeployment6]
+.General settings for PgAdmin 4 server connection setup
+image::../docs/deployment_guide/images/image7.png[image,width=502,height=548]
+
+. Choose the *Connection* tab, and provide the following values.
+
+* In the *Host name/address* field, enter 127.0.0.1.
+* In the *Maintenance database* field, enter the <DBName>.
+* In the *Username* field, enter the <DBMasterUsername>.
+
+These values can be found on the *Outputs* tab of the Aurora stack. See Figure 4.
+
+* In the *Password* field, enter the <DBMasterUserPassword> you entered during stack creation.
+
+. Choose *Save* to store the connection information and to connect.
+
+[#postdeployment7]
+.Connection setting for Aurora PostgreSQL DB cluster
+image::../docs/deployment_guide/images/image8.png[image,width=499,height=549]
+
+Upon successful connection you will see a PgAdmin 4 dashboard, as shown in Figure 9.
+
+[#postdeployment8]
+.Confirmation that the Aurora PostgreSQL cluster is accepting connections
+image::../docs/deployment_guide/images/image9.png[image,width=648,height=412]
+
+. Terminate the SSH tunnel by pressing Ctrl+C.

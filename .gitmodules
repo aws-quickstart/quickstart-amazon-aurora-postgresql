@@ -6,3 +6,6 @@
 	path = submodules/quickstart-linux-bastion
 	url = https://github.com/aws-quickstart/quickstart-linux-bastion.git
 	branch = main
+[submodule "docs/boilerplate"]
+	path = docs/boilerplate
+	branch = main

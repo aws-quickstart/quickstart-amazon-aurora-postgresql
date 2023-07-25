@@ -1,0 +1,17 @@
+This Quick Start reference deployment guide provides step-by-step instructions for deploying an Amazon Aurora PostgreSQL database on the AWS Cloud with high availability and failover support.
+
+This Quick Start is for users who are looking for a repeatable, customizable reference deployment for Aurora PostgreSQL using AWS CloudFormation. You can also use the Quick Start as a building block in your own automated deployments by using the link:#option-2-parameters-for-deploying-aurora-postgresql-an-existing-vpc[existing-VPC template that we’ve provided]. This template will build only the Aurora database components and is designed to plug into your existing AWS CloudFormation templates as a drop-in PostgreSQL database replacement.
+
+=== Amazon Aurora
+
+Aurora is a fully managed relational database engine that’s compatible with MySQL and PostgreSQL. MySQL and PostgreSQL combine the speed and reliability of high-end commercial databases with the simplicity and cost-effectiveness of open-source databases. The code, tools, and applications you use today with your existing MySQL and PostgreSQL databases can be used with Aurora. With some workloads, Aurora can deliver up to five times the throughput of MySQL and up to three times the throughput of PostgreSQL without requiring changes to most of your existing applications.
+
+Aurora includes a high-performance storage subsystem. Its database engines are customized to take advantage of that fast distributed storage. The underlying storage grows automatically as needed, up to 64 terabytes. Aurora also automates and standardizes database clustering and replication, which are typically among the most challenging aspects of database configuration and administration.
+
+Aurora is part of the managed database service Amazon Relational Database Service (Amazon RDS). Amazon RDS is a web service that makes it easier to set up, operate, and scale a relational database in the cloud. If you are not already familiar with Amazon RDS, see the https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html[Amazon Relational Database Service User Guide].
+
+You can choose Aurora as a DB engine option when setting up new database servers through Amazon RDS. Aurora provides the following features:
+
+* Aurora takes advantage of the Amazon RDS features for management and administration. It uses the Amazon RDS AWS Management Console interface, AWS Command Line Interface (AWS CLI) commands, and API operations to handle routine database tasks such as provisioning, patching, backup, recovery, failure detection, and repair.
+* Aurora management operations typically involve entire clusters of database servers that are synchronized through replication, instead of individual database instances. The automatic clustering, replication, and storage allocation make it simple and cost-effective to set up, operate, and scale your largest PostgreSQL deployments.
+* You can bring data from Amazon RDS for PostgreSQL into Aurora by creating and restoring snapshots, or by setting up one-way replication. You can use push-button migration tools to convert your existing Amazon RDS for PostgreSQL applications to Aurora.
