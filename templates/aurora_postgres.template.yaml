@@ -30,8 +30,8 @@ Metadata:
       Parameters:
         - DBEngineVersion
         - DBInstanceClass
-        - MinACUs
-        - MaxACUs
+        - ServerlessMinCapacity
+        - ServerlessMaxCapacity
         - DBPort
         - DBName
         - DBMasterUsername
@@ -44,11 +44,11 @@ Metadata:
     - Label:
         default: Database Storage configuration
       Parameters:  
-        - DBAllocatedStorageEncrypted
+        - DBStorageEncrypted
         - StorageType
     - Label:
         default: Database Monitoring configuration
-      Parameters:  
+      Parameters:
         - DBExportLogToCloudwatch
         - EnablePerformanceInsights
         - PerformanceInsightsRetentionPeriod
@@ -57,7 +57,7 @@ Metadata:
         - EnableEventSubscription
         - NotificationList
     - Label:
-        default: Database tags (optional)
+        default: "[Optional] Database tags"
       Parameters:
         - EnvironmentStage
         - Application
@@ -65,7 +65,7 @@ Metadata:
         - ProjectCostCenter
         - Confidentiality
         - Compliance
-  
+
 ###############################################################################
 # Parameter labels
 ###############################################################################
@@ -82,8 +82,6 @@ Metadata:
         default: Custom security group ID
       DBAccessCIDR:
         default: Database connection CIDR
-      DBAllocatedStorageEncrypted:
-        default: Database encryption enabled
       DBAutoMinorVersionUpgrade:
         default: Database auto minor version upgrade
       DBBackupRetentionPeriod:
@@ -91,7 +89,7 @@ Metadata:
       DBEngineVersion:
         default: Database Engine Version
       DBExportLogToCloudwatch:
-        default: Export Database Log to CloudWatch
+        default: Export Database Logs to CloudWatch
       DBInstanceClass:
         default: Database instance class
       DBMasterUsername:
@@ -104,6 +102,8 @@ Metadata:
         default: Database name
       DBPort:
         default: Database port
+      DBStorageEncrypted:
+        default: Database encryption enabled
       EnableEnhancedMonitoring:
         default: Enable Enhanced Monitoring
       EnableEventSubscription:
@@ -116,20 +116,20 @@ Metadata:
         default: Environment stage
       ManageMasterUserPassword:
         default: Manage DB master user password with AWS Secrets Manager
-      MaxACUs:
-        default: Maximum Aurora Serverless v2 capacity units (ACUs)
-      MinACUs:
-        default: Minimum Aurora Serverless v2 capacity units (ACUs)
       MonitoringInterval:
         default: Enhanced monitoring interval
       NotificationList:
         default: SNS notification email
       PerformanceInsightsRetentionPeriod:
-        default:  Number of days to retain Performance Insights data
+        default: Number of days to retain Performance Insights data
       ProjectCostCenter:
         default: Project cost center
       PubliclyAccessible:
         default: Publicly Accessible
+      ServerlessMinCapacity:
+        default: Minimum Aurora Serverless v2 capacity units (ACUs)
+      ServerlessMaxCapacity:
+        default: Maximum Aurora Serverless v2 capacity units (ACUs)
       Subnet1ID:
         default: Private subnet 1 ID
       Subnet2ID:
@@ -140,191 +140,9 @@ Metadata:
         default: VPC ID
 
 ###############################################################################
-# Mappings
-###############################################################################
-Mappings:
-  DBFamilyMap:
-    '11.13':
-      family: aurora-postgresql11
-    '11.14':
-      family: aurora-postgresql11
-    '11.15':
-      family: aurora-postgresql11
-    '11.16':
-      family: aurora-postgresql11
-    '11.17':
-      family: aurora-postgresql11
-    '11.18':
-      family: aurora-postgresql11
-    '11.19':
-      family: aurora-postgresql11
-    '12.8':
-      family: aurora-postgresql12
-    '12.9':
-      family: aurora-postgresql12
-    '12.10':
-      family: aurora-postgresql12
-    '12.11':
-      family: aurora-postgresql12
-    '12.12':
-      family: aurora-postgresql12
-    '12.13':
-      family: aurora-postgresql12
-    '12.14':
-      family: aurora-postgresql12
-    '13.4':
-      family: aurora-postgresql13
-    '13.5':
-      family: aurora-postgresql13
-    '13.6':
-      family: aurora-postgresql13
-    '13.7':
-      family: aurora-postgresql13
-    '13.8':
-      family: aurora-postgresql13
-    '13.9':
-      family: aurora-postgresql13
-    '13.10':
-      family: aurora-postgresql13
-    '14.3':
-      family: aurora-postgresql14
-    '14.4':
-      family: aurora-postgresql14
-    '14.5':
-      family: aurora-postgresql14
-    '14.6':
-      family: aurora-postgresql14
-    '14.7':
-      family: aurora-postgresql14
-    '15.2':
-      family: aurora-postgresql15
-
-###############################################################################
-# Conditions
-###############################################################################
-Conditions:
-  CreateSecurityGroup:
-    !Equals
-    - !Ref CustomDBSecurityGroup
-    - ''
-  CreateKMSKey: !Or
-    - !Condition UseDatabaseEncryption
-    - !Condition UseSecretsManager
-    - !Condition EnablePI
-  DoCreateDatabase:
-    !Not
-      - !Equals
-        - !Ref DBName
-        - ''
-  EnableDBLogExport:
-    !Equals
-    - !Ref DBExportLogToCloudwatch
-    - "true"
-  IsASV2:
-    !Equals
-    - !Ref DBInstanceClass
-    - 'db.serverless'
-  IsDBMultiAZ:
-    !Equals
-    - !Ref DBMultiAZ
-    - 'true'
-  EventSubscription:
-    !Equals
-    - !Ref EnableEventSubscription
-    - 'true'
-  EnableEM: !Equals
-    - !Ref EnableEnhancedMonitoring
-    - 'true'
-  EnablePI: !Equals
-    - !Ref EnablePerformanceInsights
-    - 'true'
-  UseDatabaseEncryption:
-    !Equals
-    - !Ref DBAllocatedStorageEncrypted
-    - "true"
-  UseSecretsManager: !Equals
-    - !Ref ManageMasterUserPassword
-    - "true"
-
-###############################################################################
-# Rules
-###############################################################################
-Rules:
-  SubnetsInVPC:
-    Assertions:
-      - Assert: !Equals [!ValueOf ["Subnet1ID", "VpcId"], !Ref VPCID]
-        AssertDescription: "Private subnet 1 ID doesn't belong to the specified VPC"
-      - Assert: !Equals [!ValueOf ["Subnet2ID", "VpcId"], !Ref VPCID]
-        AssertDescription: "Private subnet 2 ID doesn't belong to the specified VPC"
-  SubnetsUnique:
-    Assertions:
-      - Assert: !Not [!Equals [!Ref Subnet1ID, !Ref Subnet2ID]]
-        AssertDescription: "Please provide 2 distinct private subnets"
-
-###############################################################################
-# Outputs
-###############################################################################
-Outputs:
-  DBName:
-    Condition: DoCreateDatabase
-    Description: "Amazon Aurora database name"
-    Value: !Ref DBName
-  DBMasterUsername:
-    Description: "Amazon Aurora database master username"
-    Value: !Ref DBMasterUsername
-  MasterUserSecret:
-    Condition: UseSecretsManager
-    Description: "Master Credentials ARN"
-    Value: !Sub "${AuroraDBCluster.MasterUserSecret.SecretArn}"
-  RDSEndPointAddress:
-    Description: "Amazon Aurora write endpoint"
-    Value: !Sub ${AuroraDBCluster.Endpoint.Address}
-  RDSReadEndPointAddress:
-    Description: "Amazon Aurora read endpoint"
-    Value: !Sub ${AuroraDBCluster.ReadEndpoint.Address}
-  RDSEndPointPort:
-    Description: "Amazon Aurora port"
-    Value: !Sub ${AuroraDBCluster.Endpoint.Port}
-  RDSEndPoints:
-    Description: "Full Amazon Aurora write endpoint"
-    Value: !If [DoCreateDatabase, !Sub "${AuroraDBCluster.Endpoint.Address}:${AuroraDBCluster.Endpoint.Port}/${DBName}", !Sub "${AuroraDBCluster.Endpoint.Address}:${AuroraDBCluster.Endpoint.Port}/postgres"]
-  RDSEncryptionKey:
-    Condition: UseDatabaseEncryption
-    Description: The alias of the encryption key created for RDS
-    Value: !Ref EncryptionKeyAlias
-
-###############################################################################
 # Parameters
 ###############################################################################
 Parameters:
-  Application:
-    Type: String
-    Default: ''
-    Description: Designates the application of the associated AWS resource. (Optional)
-  ApplicationVersion:
-    Type: String
-    Description: Designates the specific version of the application. (Optional)
-    Default: ''
-  Compliance:
-    Type: String
-    Default: ''
-    Description: Designates the compliance level for the AWS resource. (Optional)
-    AllowedValues:
-      - hipaa
-      - sox
-      - fips
-      - other
-      - ''
-  Confidentiality:
-    Type: String
-    Default: ''
-    Description: Designates the confidentiality classification of the data that is associated with the resource. (Optional)
-    AllowedValues:
-      - public
-      - private
-      - confidential
-      - pii/phi
-      - ''
   CustomDBSecurityGroup:
     Description: "ID of the security group (e.g., sg-0234se). One will be created for you if left empty."
     Type: String
@@ -335,19 +153,12 @@ Parameters:
     Description: "Allowed CIDR block for external access (use VPC CIDR)."
     Type: String
     Default: 10.0.0.0/16
-  DBAllocatedStorageEncrypted:
-    Default: "true"
-    AllowedValues:
-      - "true"
-      - "false"
-    Description: Whether or not to encrypt the database.
-    Type: String
   DBAutoMinorVersionUpgrade:
     AllowedValues:
       - "true"
       - "false"
     Default: "false"
-    Description: "Select true to set up auto minor version upgrade."
+    Description: "Select 'true' to set up auto minor version upgrade."
     Type: String
   DBBackupRetentionPeriod:
     Default: 35
@@ -356,13 +167,13 @@ Parameters:
     MinValue: 0
     MaxValue: 35
   DBEngineVersion:
-    Description: >- 
+    Description: >-
       Select Database Engine Version. 
       Aurora Serverless v2 with Aurora PostgreSQL is available in v13.6 & higher, v14.3 & higher, and v15.2 & higher.
       Aurora I/O-Optimized configuration is available in Aurora PostgreSQL v13.10 and higher, v14.7 and higher, and v15.2 and higher.
       For supported engines and Region availability for Aurora Serverless v2 with Aurora PostgreSQL, refer https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.Aurora_Fea_Regions_DB-eng.Feature.ServerlessV2.html
     Type: String
-    Default: 14.7
+    Default: 15.3
     AllowedValues:
       - 11.13
       - 11.14
@@ -371,6 +182,7 @@ Parameters:
       - 11.17
       - 11.18
       - 11.19
+      - 11.20
       - 12.8
       - 12.9
       - 12.10
@@ -378,6 +190,7 @@ Parameters:
       - 12.12
       - 12.13
       - 12.14
+      - 12.15
       - 13.4
       - 13.5
       - 13.6
@@ -385,12 +198,15 @@ Parameters:
       - 13.8
       - 13.9
       - 13.10
+      - 13.11
       - 14.3
       - 14.4
       - 14.5
       - 14.6
       - 14.7
-      - 15.2  
+      - 14.8
+      - 15.2
+      - 15.3
   DBExportLogToCloudwatch:
     Default: "true"
     AllowedValues:
@@ -399,11 +215,11 @@ Parameters:
     Description: Whether or not to export Database logs to CloudWatch
     Type: String
   DBInstanceClass:
-    Default: db.r6g.2xlarge
     Description: >-
       The database instance type. 
-      Please see supported instance types for the Aurora PostgreSQL version selected https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.DBInstanceClass.html.
+      Please see supported instance types for the Aurora PostgreSQL version selected https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.DBInstanceClass.html#Concepts.DBInstanceClass.SupportAurora
     Type: String
+    Default: db.r6g.2xlarge
     AllowedValues:
       - db.r5.12xlarge
       - db.r5.16xlarge
@@ -447,23 +263,19 @@ Parameters:
       - db.x2g.4xlarge
       - db.x2g.8xlarge
       - db.x2g.large
-      - db.x2g.xlarge     
+      - db.x2g.xlarge
   DBMasterUsername:
     AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
     ConstraintDescription: "Must begin with a letter and contain only alphanumeric characters."
-    Default: pgadmin
-    Description: "The database master username."
+    Description: (Required) The database master username. Must begin with a letter and contain only alphanumeric characters.
     MaxLength: "16"
     MinLength: "1"
     Type: String
   DBMasterUserPassword:
-    AllowedPattern: >-
-      ^(?=^.{8,255}$)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)((?=.*[^A-Za-z0-9])(?!.*[@/"'])).*$
-    ConstraintDescription: >-
-      Min 8 chars. Must include 1 uppercase, 1 lowercase, 1 number, 1 (non / @ " ') symbol
-    Default: "Gjht56Ft$"
-    Description: The database master user password. Required if "Manage DB master user password with AWS Secrets Manager" option is set to false.
-    MaxLength: "64"
+    AllowedPattern: ^(?=^.{8,255}$)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)((?=.*[^A-Za-z0-9])(?!.*[@/"'])).*$
+    ConstraintDescription: Min 8 chars. Must include 1 uppercase, 1 lowercase, 1 number, 1 (non / @ " ') symbol
+    Description: (Required) The database master user password. Min 8 chars. Must include 1 uppercase, 1 lowercase, 1 number, 1 (non / @ " ') symbol. Ignored if 'Manage DB master user password with AWS Secrets Manager' option is set to 'true'.
+    MaxLength: "99"
     MinLength: "8"
     NoEcho: "True"
     Type: String
@@ -477,7 +289,7 @@ Parameters:
   DBName:
     AllowedPattern: "[a-zA-Z0-9]*"
     Description: "Name of the initial PostgreSQL database to create."
-    MaxLength: "64"
+    MaxLength: "63"
     MinLength: "0"
     Default: 'sampleapp'
     Type: String
@@ -488,64 +300,47 @@ Parameters:
     ConstraintDescription: 'Must be in the range [1150-65535].'
     MinValue: 1150
     MaxValue: 65535
+  DBStorageEncrypted:
+    Default: "true"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: "To disable database encryption, choose 'false'."
+    Type: String
   EnableEnhancedMonitoring:
     AllowedValues:
       - "true"
       - "false"
     Default: "true"
-    Description: "Enables RDS Performance Insights"
+    Description: "Set to 'true' to enable Enahanced Monitoring."
     Type: String
   EnableEventSubscription:
     AllowedValues:
       - "true"
       - "false"
     Default: "true"
-    Description: "Enables event subscription to Notification List"
+    Description: "Enables event subscription to Notification List."
     Type: String
   EnableIAMDBAuth:
     AllowedValues:
       - "true"
       - "false"
     Default: "true"
-    Description: "Enables IAM Database Authentication"
+    Description: "Enables IAM Database Authentication."
     Type: String
   EnablePerformanceInsights:
     AllowedValues:
       - "true"
       - "false"
     Default: "true"
-    Description: "Enables RDS Performance Insights"
+    Description: "Enables RDS Performance Insights."
     Type: String
-  EnvironmentStage:
-    Type: String
-    Description: Designates the environment stage of the associated AWS resource. (Optional)
-    AllowedValues:
-      - dev
-      - test
-      - pre-prod
-      - prod
-      - none
-    Default: none
   ManageMasterUserPassword:
     AllowedValues:
       - "true"
       - "false"
     Default: "true"
-    Description: "Set to true to manage the master user password with AWS Secrets Manager."
-    Type: String
-  MaxACUs:
-    Default: "64"
-    Description: >-
-      Required if "db.serverless" is choosen as the database instance class.
-      Specify maximum Aurora Serverless v2 Capacity Units (ACUs) in the range of 1 to 128 in increments of 0.5. 
-      1 ACU provides 2 GiB of memory and corresponding compute and networking.
-    Type: String
-  MinACUs:
-    Default: "8"
-    Description: >-
-      Required if "db.serverless" is choosen as the database instance class.
-      Specify minumum Aurora Serverless v2 Capacity Units (ACUs) in the range of 0.5 to 128 in increments of 0.5. 
-      1 ACU provides 2 GiB of memory and corresponding compute and networking.
+    Description: "Set to 'true' to manage the master user password with AWS Secrets Manager."
     Type: String
   MonitoringInterval:
     Default: 10
@@ -567,21 +362,35 @@ Parameters:
     ConstraintDescription: Provide a valid email address.
   PerformanceInsightsRetentionPeriod:
     Default: 7
-    Description: "The number of days for which automatic database snapshots are retained. Specify days based on (month * 31), where month is a number of months from 1-23"
+    Description: "The number of days for which automatic database snapshots are retained. Specify days based on (month * 31), where month is a number of months from 1-23."
     Type: Number
     MinValue: 7
     MaxValue: 713
-  ProjectCostCenter:
-    Type: String
-    Default: ''
-    Description: Designates the cost center associated with the project of the given AWS resource. (Optional)
   PubliclyAccessible:
     AllowedValues:
       - "true"
       - "false"
     Default: "false"
-    Description: "Indicates whether the DB instance is an internet-facing instance"
+    Description: "Indicates whether the DB instance is an internet-facing instance."
     Type: String
+  ServerlessMinCapacity:
+    Default: 8
+    Description: >-
+      Required if "db.serverless" is chosen as the database instance class.
+      Specify minimum Aurora Serverless v2 Capacity Units (ACUs) in the range of 0.5 to 128 in increments of 0.5.
+      1 ACU provides 2 GiB of memory and corresponding compute and networking.
+    Type: String
+    AllowedPattern: ([0-9]?(\.(0|5))?|[1-8][0-9](\.(0|5))?|9[0-9]|1[01][0-9](\.(0|5))?|12[0-7](\.(0|5))?|128)
+    ConstraintDescription: "Only values from 0.5 to 128, in increments of 0.5"
+  ServerlessMaxCapacity:
+    Default: 64
+    Description: >-
+      Required if "db.serverless" is chosen as the database instance class.
+      Specify maximum Aurora Serverless v2 Capacity Units (ACUs) in the range of 1 to 128 in increments of 0.5. 
+      1 ACU provides 2 GiB of memory and corresponding compute and networking.
+    Type: String
+    AllowedPattern: ([1-9]?(\.(0|5))?|[1-8][0-9](\.(0|5))?|9[0-9]|1[01][0-9](\.(0|5))?|12[0-7](\.(0|5))?|128)
+    ConstraintDescription: "Only values from 1 to 128, in increments of 0.5"
   StorageType:
     Type: String
     Description: >-
@@ -601,12 +410,185 @@ Parameters:
     Description: "ID of the VPC you are deploying Aurora into (e.g., vpc-0343606e)."
     Type: 'AWS::EC2::VPC::Id'
     Default: ''
+  
+  #Optional parameters
+  Application:
+    Type: String
+    Default: ""
+    Description: "[Optional] Name of the application for the associated AWS resource."
+  ApplicationVersion:
+    Type: String
+    Description: "[Optional] Version of the application."
+    Default: ""
+  Compliance:
+    Type: String
+    Default: ""
+    Description: "[Optional] Compliance level for the AWS resource."
+    AllowedValues:
+      - hipaa
+      - sox
+      - fips
+      - other
+      - ""
+  Confidentiality:
+    Type: String
+    Default: ""
+    Description: "[Optional] Confidentiality classification of the data that is associated with the AWS resource."
+    AllowedValues:
+      - public
+      - private
+      - confidential
+      - pii/phi
+      - none
+      - ""
+  EnvironmentStage:
+    Type: String
+    Description: "[Optional] Environment stage of the associated AWS resource."
+    AllowedValues:
+      - dev
+      - test
+      - pre-prod
+      - prod
+      - none
+    Default: none
+  ProjectCostCenter:
+    Type: String
+    Default: ""
+    Description: "[Optional] Designates the cost center associated with the project of the given AWS resource."
+
+###############################################################################
+# Mappings
+###############################################################################
+Mappings:
+  DBFamilyMap:
+    '11.13':
+      family: aurora-postgresql11
+    '11.14':
+      family: aurora-postgresql11
+    '11.15':
+      family: aurora-postgresql11
+    '11.16':
+      family: aurora-postgresql11
+    '11.17':
+      family: aurora-postgresql11
+    '11.18':
+      family: aurora-postgresql11
+    '11.19':
+      family: aurora-postgresql11
+    '11.20':
+      family: aurora-postgresql11
+    '12.8':
+      family: aurora-postgresql12
+    '12.9':
+      family: aurora-postgresql12
+    '12.10':
+      family: aurora-postgresql12
+    '12.11':
+      family: aurora-postgresql12
+    '12.12':
+      family: aurora-postgresql12
+    '12.13':
+      family: aurora-postgresql12
+    '12.14':
+      family: aurora-postgresql12
+    '12.15':
+      family: aurora-postgresql12
+    '13.4':
+      family: aurora-postgresql13
+    '13.5':
+      family: aurora-postgresql13
+    '13.6':
+      family: aurora-postgresql13
+    '13.7':
+      family: aurora-postgresql13
+    '13.8':
+      family: aurora-postgresql13
+    '13.9':
+      family: aurora-postgresql13
+    '13.10':
+      family: aurora-postgresql13
+    '13.11':
+      family: aurora-postgresql13
+    '14.3':
+      family: aurora-postgresql14
+    '14.4':
+      family: aurora-postgresql14
+    '14.5':
+      family: aurora-postgresql14
+    '14.6':
+      family: aurora-postgresql14
+    '14.7':
+      family: aurora-postgresql14
+    '14.8':
+      family: aurora-postgresql14
+    '15.2':
+      family: aurora-postgresql15
+    '15.3':
+      family: aurora-postgresql15
+
+###############################################################################
+# Conditions
+###############################################################################
+Conditions:
+  CreateSecurityGroup: !Equals
+    - !Ref CustomDBSecurityGroup
+    - ''
+  CreateKMSKey: !Or
+    - !Condition UseDatabaseEncryption
+    - !Condition UseSecretsManager
+    - !Condition EnablePI
+  DoCreateDatabase:
+    !Not
+      - !Equals
+        - !Ref DBName
+        - ''
+  EnableDBLogExport:
+    !Equals
+    - !Ref DBExportLogToCloudwatch
+    - "true"
+  IsASV2:
+    !Equals
+    - !Ref DBInstanceClass
+    - 'db.serverless'
+  IsDBMultiAZ: !Equals
+    - !Ref DBMultiAZ
+    - 'true'
+  EventSubscription: !Equals
+    - !Ref EnableEventSubscription
+    - 'true'
+  EnableEM: !Equals
+    - !Ref EnableEnhancedMonitoring
+    - 'true'
+  EnablePI: !Equals
+    - !Ref EnablePerformanceInsights
+    - 'true'
+  UseDatabaseEncryption: !Equals
+    - !Ref DBStorageEncrypted
+    - "true"
+  UseSecretsManager: !Equals
+    - !Ref ManageMasterUserPassword
+    - "true"
+
+###############################################################################
+# Rules
+###############################################################################
+Rules:
+  SubnetsInVPC:
+    Assertions:
+      - Assert: !Equals [!ValueOf ["Subnet1ID", "VpcId"], !Ref VPCID]
+        AssertDescription: "Private subnet 1 ID doesn't belong to the specified VPC"
+      - Assert: !Equals [!ValueOf ["Subnet2ID", "VpcId"], !Ref VPCID]
+        AssertDescription: "Private subnet 2 ID doesn't belong to the specified VPC"
+  SubnetsUnique:
+    Assertions:
+      - Assert: !Not [!Equals [!Ref Subnet1ID, !Ref Subnet2ID]]
+        AssertDescription: "Please provide 2 distinct private subnets"
 
 ###############################################################################
 # Resources
 ###############################################################################
 Resources:
-  
+
   AuroraDBSubnetGroup:
     Properties:
       DBSubnetGroupDescription: "Subnets available for the Amazon Aurora database cluster"
@@ -625,12 +607,14 @@ Resources:
           FromPort: -1
           IpProtocol: '-1'
           ToPort: -1
+          Description: Allows all outbound traffic
       SecurityGroupIngress:
         -
           CidrIp: !Ref DBAccessCIDR
           FromPort: !Ref DBPort
           IpProtocol: tcp
           ToPort: !Ref DBPort
+          Description: Access from the DBAccessCIDR specified
       VpcId: !Ref VPCID
       Tags:
       - Key: Name
@@ -649,6 +633,7 @@ Resources:
   DBSNSTopic:
     Type: AWS::SNS::Topic
     Properties:
+      KmsMasterKeyId: !If [UseDatabaseEncryption, !Ref EncryptionKey, !Ref 'AWS::NoValue']
       Subscription:
       - Endpoint: !Ref NotificationList
         Protocol: email
@@ -663,26 +648,40 @@ Resources:
             - EIAMPolicyActionWildcard: "All KMS actions allowed by design"
     Condition: CreateKMSKey
     DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Type: AWS::KMS::Key
     Properties:
+      Description: !Join [ "- ", [ "KMS Key for Cloudformation Stack ", !Ref AWS::StackName ] ]
       EnableKeyRotation: true
       KeyPolicy:
         Version: 2012-10-17
         Id: !Ref AWS::StackName
         Statement:
-          - Effect: Allow
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
             Principal:
               AWS:
                 - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:root"
             Action: 'kms:*'
+            Resource: '*'
+          - Sid: Enable RDS and CloudWatch Service Permissions
+            Effect: Allow
+            Principal:
+              Service: 
+                - 'events.rds.amazonaws.com'
+                - 'cloudwatch.amazonaws.com'
+                - 'events.amazonaws.com'
+            Action:
+              - 'kms:GenerateDataKey*'
+              - 'kms:Decrypt'
             Resource: '*'
       Tags:
         - Key: Name
           Value: !Ref AWS::StackName
   
   EncryptionKeyAlias:
-    Condition: UseDatabaseEncryption
     Type: AWS::KMS::Alias
+    Condition: CreateKMSKey
     Properties:
       AliasName: !Sub "alias/${AWS::StackName}"
       TargetKeyId: !Ref EncryptionKey
@@ -705,6 +704,13 @@ Resources:
       ManagedPolicyArns:
         - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole
 
+  APGDBCPG:
+    Type: AWS::RDS::DBClusterParameterGroup
+    Properties:
+      Description: !Join [ "- ", [ "Aurora PG Cluster Parameter Group for Cloudformation Stack ", !Ref AWS::StackName ] ]
+      Family: !FindInMap [DBFamilyMap, !Ref DBEngineVersion, "family"]
+      Parameters:
+        rds.force_ssl: 0
   APGDBPG:
     Type: AWS::RDS::DBParameterGroup
     Properties:
@@ -714,13 +720,6 @@ Resources:
         log_rotation_age: '1440'
         log_rotation_size: '102400'
 
-  APGDBCPG:
-    Type: AWS::RDS::DBClusterParameterGroup
-    Properties:
-      Description: !Join [ "- ", [ "Aurora PG Cluster Parameter Group for Cloudformation Stack ", !Ref AWS::StackName ] ]
-      Family: !FindInMap [DBFamilyMap, !Ref DBEngineVersion, "family"]
-      Parameters:
-        rds.force_ssl: 0
 
   AuroraDBCluster:
     Metadata:
@@ -732,7 +731,7 @@ Resources:
           ignore_reasons:
             - ERDSStorageEncryptionEnabled: "StorageEncryption is conditional"
             - E2521: "When ManageMasterUserPassword is set to true, MasterUserPassword is ignored"
-    Type: "AWS::RDS::DBCluster"
+    Type: AWS::RDS::DBCluster
     DeletionPolicy: Snapshot
     UpdateReplacePolicy: Snapshot
     Properties:
@@ -745,7 +744,7 @@ Resources:
       DBClusterIdentifier: !Sub apg-${AWS::StackName}
       DBClusterParameterGroupName: !Ref APGDBCPG
       DBSubnetGroupName: !Ref AuroraDBSubnetGroup
-      EnableCloudwatchLogsExports:
+      EnableCloudwatchLogsExports: 
         - !If [EnableDBLogExport, postgresql, !Ref 'AWS::NoValue']
       EnableIAMDatabaseAuthentication: !Ref EnableIAMDBAuth
       Engine: aurora-postgresql
@@ -758,9 +757,9 @@ Resources:
         KmsKeyId: !If [UseSecretsManager, !Ref EncryptionKey, !Ref 'AWS::NoValue']
       Port: !Ref DBPort
       ServerlessV2ScalingConfiguration:
-        MinCapacity: !If [IsASV2, !Ref MinACUs, !Ref 'AWS::NoValue']
-        MaxCapacity: !If [IsASV2, !Ref MaxACUs, !Ref 'AWS::NoValue']
-      StorageEncrypted: !If [UseDatabaseEncryption, !Ref DBAllocatedStorageEncrypted, !Ref 'AWS::NoValue']
+        MinCapacity: !If [IsASV2, !Ref ServerlessMinCapacity, !Ref 'AWS::NoValue']
+        MaxCapacity: !If [IsASV2, !Ref ServerlessMaxCapacity, !Ref 'AWS::NoValue']
+      StorageEncrypted: !If [UseDatabaseEncryption, !Ref DBStorageEncrypted, !Ref 'AWS::NoValue']
       StorageType: !Ref StorageType
       Tags:
         -
@@ -789,16 +788,18 @@ Resources:
           - CreateSecurityGroup
           - [!Ref RDSSecurityGroup]
           - [!Ref CustomDBSecurityGroup]
-    
+
   Inst1:
-    Type: "AWS::RDS::DBInstance"
+    Type: AWS::RDS::DBInstance
     Metadata:
       cfn-lint:
         config:
           ignore_checks:
             - ERDSDBInstancePubliclyAccessible
+            - I3011
           ignore_reasons:
             - ERDSDBInstancePubliclyAccessible: "PubliclyAccessible is false by default"
+            - I3011: "Update/Deletion policy is set at the cluster level for Amazon Aurora"
     Properties:
       AutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
       DBClusterIdentifier: !Ref AuroraDBCluster
@@ -833,17 +834,19 @@ Resources:
         -
           Key: Compliance
           Value: !Ref Compliance
-  
+
   Inst2:
-    Type: "AWS::RDS::DBInstance"
+    Type: AWS::RDS::DBInstance
     Condition: IsDBMultiAZ
     Metadata:
       cfn-lint:
         config:
           ignore_checks:
             - ERDSDBInstancePubliclyAccessible
+            - I3011
           ignore_reasons:
             - ERDSDBInstancePubliclyAccessible: "PubliclyAccessible is false by default"
+            - I3011: "Update/Deletion policy is set at the cluster level for Amazon Aurora"
     Properties:
       AutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
       DBClusterIdentifier: !Ref AuroraDBCluster
@@ -878,7 +881,7 @@ Resources:
         -
           Key: Compliance
           Value: !Ref Compliance
-    
+
   CPUUtilizationAlarm1:
     Type: "AWS::CloudWatch::Alarm"
     Properties:
@@ -921,7 +924,7 @@ Resources:
       Period: 60
       EvaluationPeriods: 5
       TreatMissingData: 'notBreaching'
-  
+
   MaxUsedTxIDsAlarm1:
     Type: "AWS::CloudWatch::Alarm"
     Properties:
@@ -985,7 +988,7 @@ Resources:
       Period: 60
       EvaluationPeriods: 5
       TreatMissingData: 'notBreaching'
-  
+
   FreeLocalStorageAlarm2:
     Condition: IsDBMultiAZ
     Type: "AWS::CloudWatch::Alarm"
@@ -1007,7 +1010,7 @@ Resources:
       Period: 60
       EvaluationPeriods: 5
       TreatMissingData: 'notBreaching'
-    
+
   DatabaseClusterEventSubscription:
     Condition: EventSubscription
     Type: 'AWS::RDS::EventSubscription'
@@ -1055,3 +1058,35 @@ Resources:
       SourceIds:
       - !Ref APGDBPG
       SourceType: 'db-parameter-group'
+
+###############################################################################
+# Outputs
+###############################################################################
+Outputs:
+  DBName:
+    Condition: DoCreateDatabase
+    Description: "Amazon Aurora database name"
+    Value: !Ref DBName
+  DBMasterUsername:
+    Description: "Amazon Aurora database master username"
+    Value: !Ref DBMasterUsername
+  MasterUserSecret:
+    Condition: UseSecretsManager
+    Description: "Master Credentials ARN"
+    Value: !Sub "${AuroraDBCluster.MasterUserSecret.SecretArn}"
+  RDSEndPointAddress:
+    Description: "Amazon Aurora write endpoint"
+    Value: !Sub "${AuroraDBCluster.Endpoint.Address}"
+  RDSReadEndPointAddress:
+    Description: "Amazon Aurora read endpoint"
+    Value: !Sub "${AuroraDBCluster.ReadEndpoint.Address}"
+  RDSEndPointPort:
+    Description: "Amazon Aurora port"
+    Value: !Sub "${AuroraDBCluster.Endpoint.Port}"
+  RDSEndPoints:
+    Description: "Full Amazon Aurora write endpoint"
+    Value: !If [DoCreateDatabase, !Sub "${AuroraDBCluster.Endpoint.Address}:${AuroraDBCluster.Endpoint.Port}/${DBName}", !Sub "${AuroraDBCluster.Endpoint.Address}:${AuroraDBCluster.Endpoint.Port}/postgres"]
+  RDSEncryptionKey:
+    Condition: UseDatabaseEncryption
+    Description: "The alias of the encryption key created for RDS"
+    Value: !Ref EncryptionKeyAlias
