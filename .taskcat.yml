@@ -20,6 +20,7 @@ project:
   parameters:
     AvailabilityZones: $[taskcat_genaz_2]
     DBMasterUserPassword: "Ae6ii5fcckj4ddi0t!"
+    DBMasterUsername: "pgadmin"
     EnableEventSubscription: "false"
     EnableBastion: "false"
     KeyPairName: $[taskcat_getkeypair]
